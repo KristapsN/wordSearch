@@ -1,0 +1,139 @@
+$dark: #252525;
+$lightGrey: #f4f4f4;
+$dark: #252525;
+$grey: #a8a8a8;
+$darkBlue: #1B1D74;
+
+*{
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+h2{
+  margin: 1.5em 0 0.6em 0;
+  text-align: center;
+  font-size: 0.43em;
+}
+.controller--background{
+  margin: 0 20px;
+}
+.edit--background{
+  display: flex;
+  align-items: center;
+  height: 100%;
+  flex-direction: column;
+  background-color: $lightGrey;
+  height: 100%;
+}
+.grid--wrapper{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid $grey;
+  margin: 20px 0px;
+  background-color: white;
+}
+.game--grid{
+  position: relative;
+  // width: 304px;
+  // height: 304px;
+  // border: 2px solid $dark;
+}
+.grid--width{
+  // border: 2px solid #696773;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  // height: 504px;
+}
+.searchable--names{
+  display: flex;
+  justify-content: center;
+}
+.searchable--names--column{
+  font-size: 0.25em;
+  display: flex;
+  justify-content: space-between;
+}
+.column--list{
+  padding: 0 1em;
+}
+.setting--wrapper{
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+.radio--wrapper{
+  display: flex;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  // background-color: $lightGrey;
+  // justify-content: space-between;
+}
+.tab--wrapper{
+  margin-bottom: 20px;
+  margin-left: 20px;
+  // border-top: 1px solid $dark;
+}
+.radio--label-wrapper{
+  font-size: 12px;
+  color: $darkBlue;
+}
+.toolbar{
+  width: 100%;
+  margin: 30px 0;
+  display: flex;
+  align-items: center;
+}
+.description--wrapper{
+  display: flex;
+  justify-content: center;
+  padding-bottom: 0.6em;
+}
+
+.description{
+  margin: 0;
+  font-size: 0.22em;
+  text-align: center;
+}
+.logo{
+  height: 80px;
+  padding: 15px 0;
+  margin: 0 20px
+}
+.wrapper{
+  max-width: 100%;
+  overflow: hidden;
+}
+.generator--wrapper{
+  margin: 0 20px;
+}
+.download--button--wrapper{
+  padding-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+.modal--download--button--wrapper{
+  padding-top: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+.login--modal{
+  position: absolute;
+  background-color: white;
+  border-radius: 8px;
+  border: solid 1px $lightGrey;
+  padding: 20px;
+  z-index: 1;
+}
+// .preview{
+//   position: absolute;
+//   height: 500px;
+//   width: 500px;
+// }
+// .preview--wrapper{
+//   position: relative;
+//   width: 100%;
+//   display: flex;
+//   justify-content: center;
+// }

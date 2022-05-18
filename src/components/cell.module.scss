@@ -1,0 +1,290 @@
+$mainGreen: #3c8f69;
+$darkGreen: #5e835e;
+$dark: #252525;
+$grey: #a8a8a8;
+$lightGrey: #f4f4f4;
+$darkBlue: #1B1D74;
+$orange: #F45E47;
+$yellow: #f0a600;
+
+.cellWrapper{
+  position: absolute;  
+  outline-width: 1px;
+  color: $dark;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-transform: capitalize;
+  font-size: 0.25em;
+}
+.answerWrapper{
+  position: absolute; 
+  background-color: $mainGreen;
+  opacity: 0.4;
+  z-index: 10;
+  border-radius: 40px;
+}
+.mainButton{
+  color: white;
+  background-color: $orange;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  letter-spacing: 0px;
+  padding: 12px 20px;
+  border: none;
+  border: 1px solid $orange;
+  border-radius: 2px;
+  transition: 0.5s;
+  cursor: pointer;
+
+  &:hover {
+    color: $orange;
+    border: 1px solid $orange;
+    background-color: white;
+  }
+  &:disabled {
+    background-color: $grey;
+    border: 1px solid $grey;
+    color: white;
+    cursor: default;
+  }
+}
+.secondaryStyle{
+  color: $orange;
+  background-color: white;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  letter-spacing: 0px;
+  padding: 12px 20px;
+  border: 1px solid $orange;
+  border-radius: 2px;
+  transition: 0.5s;
+  cursor: pointer;
+
+  &:hover {
+    color: white;
+    background-color: $orange;
+  }
+  &:disabled {
+    background-color: $lightGrey;
+    border: 3px solid $lightGrey;
+    color: $grey;
+    cursor: not-allowed;
+    &:hover {
+      background-color: $lightGrey;
+      border: 3px solid $lightGrey;
+    }
+  }
+}
+.tabButtonActive{
+  color: $dark;
+  background-color: white;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 18px 35px 18px 35px;
+  border: 0;
+  border-bottom: 3px solid $mainGreen;
+  // transition: 0.3s;
+  // margin-right: 10px;
+  cursor: pointer;
+  
+  // &:hover {
+  //   color: white;
+  //   background-color: $grey;
+  // }
+}
+.tabButton{
+  color: $dark;
+  background-color: white;
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0px;
+  padding: 18px 35px 18px 35px;
+  border: 0;
+  // transition: 0.3s;
+  // margin-right: 10px;
+  cursor: pointer;
+  
+  &:hover {
+    color: $grey;
+    // background-color: $lightGrey;
+    border-bottom: 3px solid $mainGreen;
+  }
+}
+.textInput {
+  border: 1px solid $grey;
+  font-size: 12px;
+  line-height: 28px;
+  color: $dark;
+  border-radius: 2px;
+  margin-top: 10px;
+  padding: 5px;
+  max-width: 100%;
+  min-width: 100%;
+  // &:active {
+  //   border-color: $grey;
+  // }
+}
+.inputLabel{
+  font-size: 12px;
+  color: $darkBlue;
+  // display: flex;
+  // flex-direction: column;
+}
+.inputWrapper{
+  // margin-bottom: 20px;
+}
+.inputLabelWrapper{
+  // position: absolute;
+  //   margin-left: 10px;
+  //   font-size: 14px;
+  //   background-color: white;
+  //   color: $grey;
+}
+
+.containerRadio { 
+  position: relative;
+  cursor: pointer;
+  font-size: 12px;
+  // font-weight: 600;
+  font-family: 'Roboto', sans-serif;
+  color: $grey;
+  display: flex;
+  // border: 1px solid $grey;
+}
+
+.containerRadio input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+.checkmarkRadio {
+  // height: 45px;
+  width: 100%;
+  border-radius: 2px;
+  padding: 9px 12px;
+  // border: 2px solid $dark;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.containerRadio:hover input ~ .checkmarkRadio {
+  background-color: $darkBlue;
+  color: white;
+  transition: 0.5s;
+}
+
+.containerRadio input:checked ~ .checkmarkRadio {
+  background-color: $darkBlue;
+  // border: 3px solid $dark;
+  color: white;
+}
+
+.checkmarkRadio:after {
+  position: absolute;
+  display: none;
+}
+
+.containerRadio input:checked ~ .checkmarkRadio:after {
+  display: block;
+}
+
+.containerRadio .checkmarkRadio:after {
+    top: 7px;
+    left: 7px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #FFFFFF;   
+}
+.toolbarButton{
+  border: none;
+  background-color: $lightGrey;
+  padding: 7px 20px;
+  border-radius: 20px;
+  color: $dark;
+  cursor: pointer;
+  transition: 0.5s;
+  margin: 0 5px;
+  text-decoration: none;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+
+  &:hover {
+    background-color: $grey;
+  }
+  &:disabled {
+    color: $grey;
+    cursor: not-allowed;
+    &:hover{
+      background-color: $lightGrey;
+    }
+  }
+}
+.buttonIcon{
+  margin-right: 10px;
+  color: grey;
+  font-size: 18px;
+}
+.buttonContentWrapper{
+  display: flex;
+  justify-content: center;
+
+}
+.downloadWrapper{
+  display: flex;
+}
+.errorMessage{
+  color: red;
+  font-size: 10px;
+}
+.plainIconLink{
+  border: none;
+  padding: 7px 20px;
+  background-color: transparent;
+  color: $dark;
+  cursor: pointer;
+  transition: 0.5s;
+  margin: 0 5px;
+  text-decoration: none;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+ 
+  &:hover{
+    opacity: 0.5;
+  }
+}
+.counterAndWarningWrapper{
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+}
+.textAreaCounterAndWarningWrapper{
+  display: flex;
+  justify-content: space-between;
+}
+.letterCountWrapper{
+  display: flex;
+  justify-content: flex-end;
+}
+.letterCount{
+  font-size: 10px;
+  color: $grey;
+  padding-right: 10px;
+}
+.letterCountWarningWrapper{
+  display: flex;
+  justify-content: flex-start;
+}
+.letterCountWarning{
+  font-size: 10px;
+  color: $yellow;
+  padding-right: 10px;
+}
