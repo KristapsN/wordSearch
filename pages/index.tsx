@@ -112,7 +112,6 @@ export default function Home() {
           <Grid container className={styles.main}
             sx={{ flexGrow: 1, backgroundColor: '#030303' }}
             justifyContent="center"
-          // alignItems="center"
           >
 
             <Box className={styles.slide_down} sx={{ background: "#FCD0F4" }}>
@@ -152,14 +151,12 @@ export default function Home() {
                         alt="Word Search Maze"
                         fill
                         sizes="(max-width: 70px) 100vw,
-                  (max-width: 58px) 50vw"
-                      // width={45}
-                      // height={62}
+                        (max-width: 58px) 50vw"
                       />
                     </Box>
                   </div>
                   <div className={styles.why_wrapper}>
-                    <span className={`${permanentMarker400.className} ${styles.marker_title} ${styles.pink_marker}`}>{"  Why us?"}</span>
+                    <span className={`${permanentMarker400.className} ${styles.marker_title} ${styles.pink_marker}`}>{"Why us?"}</span>
                     <p className={`${notoSans400.className} ${styles.body_text} ${styles.margin_bottom_15}`}>{"We're working on the best and easiest word search builder and we're almost done."} </p>
                     <h3 className={`${notoSans700.className}`}>Our features:</h3>
                     <div>
@@ -171,8 +168,6 @@ export default function Home() {
                                 src="/check.svg"
                                 alt="Word Search Maze"
                                 fill
-                              // width={24}
-                              // height={24}
                               />
                             </Box>
                           </ListItemIcon>
@@ -188,8 +183,6 @@ export default function Home() {
                                 src="/check.svg"
                                 alt="Word Search Maze"
                                 fill
-                              // width={24}
-                              // height={24}
                               />
                             </Box>
                           </ListItemIcon>
@@ -205,8 +198,6 @@ export default function Home() {
                                 src="/check.svg"
                                 alt="Word Search Maze"
                                 fill
-                              // width={24}
-                              // height={24}
                               />
                             </Box>
                           </ListItemIcon>
@@ -222,13 +213,11 @@ export default function Home() {
               </Box>
             </Box>
           </Grid>
-          {/* </Slide> */}
 
         </Grid>
         <Grid item xs={12} sm={12} md={12} lg={6}>
           <Grid
             container className={styles.main}
-            // xs={12} sm={12} md={12} lg={6}
             sx={{ flexGrow: 1, backgroundColor: '#FCD0F4' }}
             direction="column"
             justifyContent="space-between"
@@ -249,9 +238,6 @@ export default function Home() {
                 </div>
               </Box>
             </Box>
-            {/* <Grid item xs={12}> */}
-            {/* <hr className={styles.hr_style}></hr> */}
-            {/* </Grid> */}
             <Box className={styles.slide_short}>
               <Box className={styles.hid_slide_short} sx={{ top: slideTopShort }}>
                 <div className={styles.subscribe_block_wrapper}>
@@ -270,97 +256,95 @@ export default function Home() {
                     </p>
                   </div>
                   {!savedSuccessfully &&
-                  <>
-                  <div className={styles.inputWithButton}>
-                    <form onSubmit={(e) => handleSubmit(e)}>
-                      <input
-                        type="email"
-                        className={styles.text_input}
-                        placeholder='Leave your email here'
-                        onChange={(e) => setEmail(e.target.value)}
-                        // onSubmit={() => handleSubmit()}
-                        value={email}
-                      />
-                      <button
-                        type="submit"
-                        disabled={disableSubmit}
-                        className={styles.submit_button}
-                        onMouseEnter={onMouseEnterSubmit}
-                        onMouseLeave={onMouseLeaveSubmit}
-                        style={{opacity: disableSubmit ? '0.4' : '1'}}
-                      // onClick={() => handleSubmit()}
-                      >
-                        {isHoveringSubmit ?
-                          <Image
-                            src="/arrow_black.svg"
-                            alt="Word Search Maze"
-                            fill
+                    <>
+                      <div className={styles.inputWithButton}>
+                        <form onSubmit={(e) => handleSubmit(e)}>
+                          <input
+                            type="email"
+                            className={styles.text_input}
+                            placeholder='Leave your email here'
+                            onChange={(e) => setEmail(e.target.value)}
+                            value={email}
                           />
-                          :
-                          <Image
-                            src="/arrow.svg"
-                            alt="Word Search Maze"
-                            fill
-                          />
-                        }
-                      </button>
-                    </form>
-                  </div>
-                  <div className={styles.checkbox_label_wrapper}>
-                    <label className={styles.margin_right_1}>
-                      <input
-                        className={styles.checkbox_input}
-                        type="checkbox"
-                        onChange={() => {
-                          setIsChecked(!isChecked)
-                          setValidationError(false)
-                        }}
-                      />
-                      <animated.svg
-                        style={checkboxAnimationStyle}
-                        className={styles.checkbox}
-                        aria-hidden="true"
-                        viewBox="0 0 15 11"
-                        fill="none"
-                        height={isChecked ? '2rem' : '1.6rem'}
-                        width={isChecked ? '2rem' : '1.6rem'}
-                      >
-                        <animated.path
-                          d="M1 4.5L5 9L14 1"
-                          strokeWidth="1"
-                          stroke="#FFFF48"
-                          ref={(ref) => {
-                            if (ref) {
-                              // @ts-ignore
-                              setCheckmarkLength(ref.getTotalLength());
+                          <button
+                            type="submit"
+                            disabled={disableSubmit}
+                            className={styles.submit_button}
+                            onMouseEnter={onMouseEnterSubmit}
+                            onMouseLeave={onMouseLeaveSubmit}
+                            style={{ opacity: disableSubmit ? '0.4' : '1' }}
+                          >
+                            {isHoveringSubmit ?
+                              <Image
+                                src="/arrow_black.svg"
+                                alt="Word Search Maze"
+                                fill
+                              />
+                              :
+                              <Image
+                                src="/arrow.svg"
+                                alt="Word Search Maze"
+                                fill
+                              />
                             }
-                          }}
-                          // @ts-ignore
-                          strokeDasharray={checkmarkLength}
-                          // @ts-ignore
-                          strokeDashoffset={checkmarkAnimationStyle.x}
-                        />
-                      </animated.svg>
-                    </label>
-                    <p onClick={() => {
-                      setIsChecked(!isChecked);
-                    }}
-                      className={`${notoSans400.className} ${styles.small_body_text}`}
-                      style={{ color: validationError ? "#FF6464" : "#030303" }}
-                    >
-                      Yor personal data will be used to support your experience throughout this
-                      website and for other purposes described in our&nbsp;
-                      <Link
-                        href='/'
-                        className={`${notoSans400.className} ${styles.small_body_text}`}
-                        style={{ color: validationError ? "#FF6464" : "#030303" }}
-                      >
-                        Terms & Privacy policy
-                      </Link>
-                    </p>
-                  </div>
-                  </>
-}
+                          </button>
+                        </form>
+                      </div>
+                      <div className={styles.checkbox_label_wrapper}>
+                        <label className={styles.margin_right_1}>
+                          <input
+                            className={styles.checkbox_input}
+                            type="checkbox"
+                            onChange={() => {
+                              setIsChecked(!isChecked)
+                              setValidationError(false)
+                            }}
+                          />
+                          <animated.svg
+                            style={checkboxAnimationStyle}
+                            className={styles.checkbox}
+                            aria-hidden="true"
+                            viewBox="0 0 15 11"
+                            fill="none"
+                            height={isChecked ? '2rem' : '1.6rem'}
+                            width={isChecked ? '2rem' : '1.6rem'}
+                          >
+                            <animated.path
+                              d="M1 4.5L5 9L14 1"
+                              strokeWidth="1"
+                              stroke="#FFFF48"
+                              ref={(ref) => {
+                                if (ref) {
+                                  // @ts-ignore
+                                  setCheckmarkLength(ref.getTotalLength());
+                                }
+                              }}
+                              // @ts-ignore
+                              strokeDasharray={checkmarkLength}
+                              // @ts-ignore
+                              strokeDashoffset={checkmarkAnimationStyle.x}
+                            />
+                          </animated.svg>
+                        </label>
+                        <p onClick={() => {
+                          setIsChecked(!isChecked);
+                        }}
+                          className={`${notoSans400.className} ${styles.small_body_text}`}
+                          style={{ color: validationError ? "#FF6464" : "#030303" }}
+                        >
+                          Yor personal data will be used to support your experience throughout this
+                          website and for other purposes described in our&nbsp;
+                          <Link
+                            href='/'
+                            className={`${notoSans400.className} ${styles.small_body_text}`}
+                            style={{ color: validationError ? "#FF6464" : "#030303" }}
+                          >
+                            Terms & Privacy policy
+                          </Link>
+                        </p>
+                      </div>
+                    </>
+                  }
                 </div>
               </Box>
             </Box>
@@ -395,7 +379,6 @@ export default function Home() {
                 </Link>
               </Box>
             </Box>
-
           </Grid>
         </Grid>
       </Grid>
