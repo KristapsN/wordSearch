@@ -159,8 +159,8 @@ export default function Home() {
                     </Box>
                   </div>
                   <div className={styles.why_wrapper}>
-                    <span className={`${permanentMarker400.className} ${styles.marker_title} ${styles.pink_marker}`}>&nbsp;&nbsp;Why us?</span>
-                    <p className={`${notoSans400.className} ${styles.body_text} ${styles.margin_bottom_15}`}>We're working on the best and easiest word search builder and we're almost done. </p>
+                    <span className={`${permanentMarker400.className} ${styles.marker_title} ${styles.pink_marker}`}>{"  Why us?"}</span>
+                    <p className={`${notoSans400.className} ${styles.body_text} ${styles.margin_bottom_15}`}>{"We're working on the best and easiest word search builder and we're almost done."} </p>
                     <h3 className={`${notoSans700.className}`}>Our features:</h3>
                     <div>
                       <List>
