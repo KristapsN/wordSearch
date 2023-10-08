@@ -1,4 +1,4 @@
-import style from './cell.module.scss';
+import './cell.css';
 
 type Props = {
   letter: string,
@@ -12,7 +12,7 @@ const Cell = ({
   letter, y, x, gridSize, gameFieldLength,
 }: Props) => (
   <div
-    className={style.cellWrapper}
+    className="cellWrapper"
     style={{
       top: `${y * (gameFieldLength / 10 / gridSize)}px`,
       left: `${x * (gameFieldLength / 10 / gridSize)}px`,
@@ -21,7 +21,7 @@ const Cell = ({
       // fontSize: `${fontSize}px`,
     }}
   >
-    <span className={style.cell}>{letter}</span>
+    <span className="cell">{letter}</span>
   </div>
 );
 

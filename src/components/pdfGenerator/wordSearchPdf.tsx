@@ -9,62 +9,15 @@ import Cell from '../cell';
 
 Font.register({ family: 'Poppins', src: PoppinsBold });
 
-// Create styles
 const styles = StyleSheet.create({
-  body: {
-    paddingTop: 35,
-    paddingBottom: 65,
-    paddingHorizontal: 35,
-    fontFamily: 'Poppins',
-  },
-  image: {
-    height: 450,
-    width: 450,
-  },
-  wordList: {
-    width: 450,
-    // height: 200,
-  },
-  page: {
-    // display: 'flex',
-    // flexDirection: 'row',
-    // backgroundColor: '#E4E4E4',
-  },
   section: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    // width: '100%',
     textAlign: 'center',
-
-  },
-  title: {
-    marginBottom: 20,
-    marginTop: 42,
-    fontSize: 25,
-    fontFamily: 'Poppins',
-    fontWeight: 'bold',
-    maxWidth: 450,
-  },
-  subtitle: {
-    fontSize: 16,
-    marginBottom: 30,
-    maxWidth: 450,
-    lineHeight: 1.5,
-  },
-  list: {
-    textTransform: 'uppercase',
-    fontSize: 14,
   },
 });
 
-// eslint-disable-next-line no-shadow
-// export enum PdfSizes {
-//  A4 = 'A4',
-//  LETTER = 'LETTER',
-//  A6 = 'A6',
-//  A7 = 'A7'
-// }
 type pdfSizesListProps = {
   name: string,
   size: [number, number]
@@ -78,31 +31,27 @@ export const pdfSizesList: pdfSizesListProps[] = [
 ];
 
 type MyDocumentProps ={
-  imageUrl: any
-  title: string
-  subtitle: string
-  listHeight: number
-  imageWidth: number
   size: [number, number]
-  wordSearchImageUrl: any
+  wordSearchImageUrl: string
 }
 
+// rename helper for react18 overload
+const MyDocumentNoType: any = Document;
+const MyPage: any = Page;
+
 const MyDocument: FC<MyDocumentProps> = ({
-  imageUrl, title, subtitle, listHeight, imageWidth, size, wordSearchImageUrl,
+  size, wordSearchImageUrl,
 }) => (
-  <Document>
-    <Page size={size} style={styles.page}>
+  <MyDocumentNoType>
+    {size && wordSearchImageUrl
+    && (
+    <MyPage size={size}>
       <View style={styles.section}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.subtitle}>{subtitle}</Text>
-        <Image
-          style={{ width: imageWidth, height: imageWidth }}
-          src={imageUrl}
-        />
-        <Image style={{ height: listHeight, width: imageWidth }} src={wordSearchImageUrl} />
+        <Image style={{ height: size[1], width: size[0] }} src={wordSearchImageUrl} />
       </View>
-    </Page>
-  </Document>
+    </MyPage>
+    )}
+  </MyDocumentNoType>
 );
 
 export default MyDocument;

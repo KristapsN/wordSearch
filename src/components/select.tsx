@@ -1,6 +1,5 @@
 import React, { FC } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import style from './cell.module.scss';
 
 type OptionsProps = {
   option: number

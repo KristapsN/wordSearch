@@ -1,16 +1,7 @@
-$mainGreen: #3c8f69;
-$darkGreen: #5e835e;
-$dark: #252525;
-$grey: #a8a8a8;
-$lightGrey: #f4f4f4;
-$darkBlue: #1B1D74;
-$orange: #F45E47;
-$yellow: #f0a600;
-
 .cellWrapper{
   position: absolute;  
   outline-width: 1px;
-  color: $dark;
+  color: #252525;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -19,82 +10,25 @@ $yellow: #f0a600;
 }
 .answerWrapper{
   position: absolute; 
-  background-color: $mainGreen;
+  /* background-color: #3c8f69; */
+  border: 2px solid black;
   opacity: 0.4;
   z-index: 10;
   border-radius: 40px;
 }
-.mainButton{
-  color: white;
-  background-color: $orange;
-  font-family: 'Poppins', sans-serif;
-  font-size: 14px;
-  letter-spacing: 0px;
-  padding: 12px 20px;
-  border: none;
-  border: 1px solid $orange;
-  border-radius: 2px;
-  transition: 0.5s;
-  cursor: pointer;
 
-  &:hover {
-    color: $orange;
-    border: 1px solid $orange;
-    background-color: white;
-  }
-  &:disabled {
-    background-color: $grey;
-    border: 1px solid $grey;
-    color: white;
-    cursor: default;
-  }
-}
-.secondaryStyle{
-  color: $orange;
-  background-color: white;
-  font-family: 'Poppins', sans-serif;
-  font-size: 14px;
-  letter-spacing: 0px;
-  padding: 12px 20px;
-  border: 1px solid $orange;
-  border-radius: 2px;
-  transition: 0.5s;
-  cursor: pointer;
-
-  &:hover {
-    color: white;
-    background-color: $orange;
-  }
-  &:disabled {
-    background-color: $lightGrey;
-    border: 3px solid $lightGrey;
-    color: $grey;
-    cursor: not-allowed;
-    &:hover {
-      background-color: $lightGrey;
-      border: 3px solid $lightGrey;
-    }
-  }
-}
 .tabButtonActive{
-  color: $dark;
+  color: #252525;
   background-color: white;
   font-size: 16px;
   font-weight: 700;
   padding: 18px 35px 18px 35px;
   border: 0;
-  border-bottom: 3px solid $mainGreen;
-  // transition: 0.3s;
-  // margin-right: 10px;
+  border-bottom: 3px solid #3c8f69;
   cursor: pointer;
-  
-  // &:hover {
-  //   color: white;
-  //   background-color: $grey;
-  // }
 }
 .tabButton{
-  color: $dark;
+  color: #252525;
   background-color: white;
   font-family: 'Poppins', sans-serif;
   font-size: 16px;
@@ -102,56 +36,35 @@ $yellow: #f0a600;
   letter-spacing: 0px;
   padding: 18px 35px 18px 35px;
   border: 0;
-  // transition: 0.3s;
-  // margin-right: 10px;
   cursor: pointer;
-  
-  &:hover {
-    color: $grey;
-    // background-color: $lightGrey;
-    border-bottom: 3px solid $mainGreen;
-  }
 }
+.tabButton:hover {
+    color: #a8a8a8;
+    border-bottom: 3px solid #3c8f69;
+  }
 .textInput {
-  border: 1px solid $grey;
+  border: 1px solid #a8a8a8;
   font-size: 12px;
   line-height: 28px;
-  color: $dark;
+  color: #252525;
   border-radius: 2px;
   margin-top: 10px;
   padding: 5px;
   max-width: 100%;
   min-width: 100%;
-  // &:active {
-  //   border-color: $grey;
-  // }
 }
 .inputLabel{
   font-size: 12px;
-  color: $darkBlue;
-  // display: flex;
-  // flex-direction: column;
-}
-.inputWrapper{
-  // margin-bottom: 20px;
-}
-.inputLabelWrapper{
-  // position: absolute;
-  //   margin-left: 10px;
-  //   font-size: 14px;
-  //   background-color: white;
-  //   color: $grey;
+  color: #1B1D74;
 }
 
-.containerRadio { 
+/* .containerRadio { 
   position: relative;
   cursor: pointer;
   font-size: 12px;
-  // font-weight: 600;
   font-family: 'Roboto', sans-serif;
-  color: $grey;
+  color: #a8a8a8;
   display: flex;
-  // border: 1px solid $grey;
 }
 
 .containerRadio input {
@@ -164,11 +77,9 @@ $yellow: #f0a600;
 }
 
 .checkmarkRadio {
-  // height: 45px;
   width: 100%;
   border-radius: 2px;
   padding: 9px 12px;
-  // border: 2px solid $dark;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -176,14 +87,13 @@ $yellow: #f0a600;
 }
 
 .containerRadio:hover input ~ .checkmarkRadio {
-  background-color: $darkBlue;
+  background-color: #1B1D74;
   color: white;
   transition: 0.5s;
 }
 
 .containerRadio input:checked ~ .checkmarkRadio {
-  background-color: $darkBlue;
-  // border: 3px solid $dark;
+  background-color: #1B1D74;
   color: white;
 }
 
@@ -203,31 +113,31 @@ $yellow: #f0a600;
     height: 10px;
     border-radius: 50%;
     background: #FFFFFF;   
-}
+} */
 .toolbarButton{
   border: none;
-  background-color: $lightGrey;
+  background-color: #f4f4f4;
   padding: 7px 20px;
   border-radius: 20px;
-  color: $dark;
+  color: #252525;
   cursor: pointer;
   transition: 0.5s;
   margin: 0 5px;
   text-decoration: none;
   font-size: 14px;
   font-family: 'Poppins', sans-serif;
-
-  &:hover {
-    background-color: $grey;
-  }
-  &:disabled {
-    color: $grey;
-    cursor: not-allowed;
-    &:hover{
-      background-color: $lightGrey;
-    }
-  }
 }
+.toolbarButton:hover {
+    background-color: #a8a8a8;
+  }
+.toolbarButton:disabled {
+    color: #a8a8a8;
+    cursor: not-allowed;
+    /* &:hover{
+      background-color: #f4f4f4;
+    } */
+  }
+
 .buttonIcon{
   margin-right: 10px;
   color: grey;
@@ -249,18 +159,17 @@ $yellow: #f0a600;
   border: none;
   padding: 7px 20px;
   background-color: transparent;
-  color: $dark;
+  color: #252525;
   cursor: pointer;
   transition: 0.5s;
   margin: 0 5px;
   text-decoration: none;
   font-size: 14px;
   font-family: 'Poppins', sans-serif;
- 
-  &:hover{
+}
+.plainIconLink:hover{
     opacity: 0.5;
   }
-}
 .counterAndWarningWrapper{
   display: flex;
   justify-content: space-between;
@@ -276,7 +185,7 @@ $yellow: #f0a600;
 }
 .letterCount{
   font-size: 10px;
-  color: $grey;
+  color: #a8a8a8;
   padding-right: 10px;
 }
 .letterCountWarningWrapper{
@@ -285,6 +194,9 @@ $yellow: #f0a600;
 }
 .letterCountWarning{
   font-size: 10px;
-  color: $yellow;
+  color: #f0a600;
   padding-right: 10px;
+}
+.fontPicker {
+  max-width: 100px;
 }
