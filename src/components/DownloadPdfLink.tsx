@@ -3,38 +3,27 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { FC } from 'react';
 import MyDocument from './pdfGenerator/wordSearchPdf';
-import style from './cell.module.scss';
+import './cell.css';
 // import {PdfSizes} from ''
 
 type DownloadPdfLinkProps = {
-  imageUrls: string
-  title: string
-  subtitle: string
-  listHeight: number
-  imageWidth: number
   size: [number, number]
   wordSearchImageUrl: string
-  disabled?: boolean;
 }
 
 const DownloadPdfLink: FC<DownloadPdfLinkProps> = ({
-  imageUrls, title, subtitle, listHeight, size, wordSearchImageUrl, imageWidth, disabled,
+  size, wordSearchImageUrl,
 }) => (
-  <div className={style.downloadWrapper}>
+  <div className="downloadWrapper">
     <PDFDownloadLink
-      className={style.toolbarButton}
+      className="toolbarButton"
       document={(
         <MyDocument
-          imageUrl={imageUrls}
-          title={title}
-          subtitle={subtitle}
-          listHeight={listHeight}
           size={size}
           wordSearchImageUrl={wordSearchImageUrl}
-          imageWidth={imageWidth}
         />
 )}
-      fileName="somename.pdf"
+      fileName="word-search-maze.pdf"
     >
       {({
         blob,
@@ -43,13 +32,13 @@ const DownloadPdfLink: FC<DownloadPdfLinkProps> = ({
       }) => (loading
         ? (
           <div>
-            <FontAwesomeIcon className={style.buttonIcon} icon={faFilePdf} />
+            <FontAwesomeIcon className="buttonIcon" icon={faFilePdf} />
             <span>Loading...</span>
           </div>
         )
         : (
           <div>
-            <FontAwesomeIcon className={style.buttonIcon} icon={faFilePdf} />
+            <FontAwesomeIcon className="buttonIcon" icon={faFilePdf} />
             <span>PDF</span>
           </div>
         ))}

@@ -1,21 +1,26 @@
 import React, { FC } from 'react';
-import style from './cell.module.scss';
+import Button from '@mui/material/Button';
 
 type ButtonProps = {
   clickHandler: () => void;
   name: string;
   disabled?: boolean;
-  mainStyle?: boolean;
+  variant?: 'text' | 'outlined' | 'contained' | undefined;
 }
 
-const Button: FC<ButtonProps> = ({
-  clickHandler, name, disabled, mainStyle,
+const ButtonFIlled: FC<ButtonProps> = ({
+  clickHandler, name, disabled, variant,
 }) => (
   <>
-    <button className={mainStyle ? style.mainButton : style.secondaryStyle} onClick={() => clickHandler()} disabled={disabled}>
+    <Button
+      // className={mainStyle ? style.mainButton : style.secondaryStyle}
+      onClick={() => clickHandler()}
+      disabled={disabled}
+      variant={variant || 'text'}
+    >
       {name}
-    </button>
+    </Button>
   </>
 );
 
-export default Button;
+export default ButtonFIlled;

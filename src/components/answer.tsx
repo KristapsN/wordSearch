@@ -1,5 +1,5 @@
 /* eslint-disable no-nested-ternary */
-import style from './cell.module.scss';
+import './cell.css';
 
 type AnswerProps = {
   y: number,
@@ -19,11 +19,13 @@ const Answer = ({
   const fullLength = length * (gameFieldLength / 10 / gridSize);
   return (
     <div
-      className={style.answerWrapper}
+      className="answerWrapper"
       style={{
         top: `${y * (gameFieldLength / 10 / gridSize)}px`,
         left: `${x * (gameFieldLength / 10 / gridSize)}px`,
-        width: `${(horizontal) ? fullLength : diagonalBottom || diagonalTop ? ((fullLength - (gameFieldLength / gridSize / 6)) * Math.sqrt(2)) : gameFieldLength / gridSize}px`,
+        width: `${(horizontal) ? fullLength : diagonalBottom
+          || diagonalTop ? ((fullLength - (gameFieldLength / gridSize / 6))
+          * Math.sqrt(2)) : gameFieldLength / gridSize}px`,
         height: `${vertical ? fullLength : gameFieldLength / gridSize}px`,
         transform: `${diagonalBottom ? 'rotate(45deg)' : diagonalTop ? 'rotate(-45deg)' : 'rotate(0deg)'}`,
         transformOrigin: `${(gameFieldLength / gridSize / 2)}px`,

@@ -66,10 +66,10 @@ const Register = () => {
       <span>Register</span>
       <TextInput placeholder="E-mail" value={registerEmail} label="E-mail: " textChangeHandler={(e) => setRegisterEmail(e.target.value)} />
       <TextInput placeholder="Password" value={registerPassword} label="Password: " textChangeHandler={(e) => setRegisterPassword(e.target.value)} />
-      <Button disabled={loading} mainStyle name="Create user" clickHandler={() => register()} />
-      <Button mainStyle name="Login" clickHandler={() => login()} />
-      <Button mainStyle name="logout" clickHandler={() => logout()} />
-      <Button mainStyle name="Forgot password" clickHandler={() => forgotPassword()} />
+      <Button disabled={loading} name="Create user" clickHandler={() => register()} />
+      <Button name="Login" clickHandler={() => login()} />
+      <Button name="logout" clickHandler={() => logout()} />
+      <Button name="Forgot password" clickHandler={() => forgotPassword()} />
 
       <span>Login</span>
       <TextInput placeholder="Email" value={loginEmail} label="E-mail: " textChangeHandler={(e) => setLoginEmail(e.target.value)} />

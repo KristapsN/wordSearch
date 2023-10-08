@@ -7,7 +7,7 @@
 /* eslint-disable no-plusplus */
 import { GridCellProps } from './generateGrid';
 
-const Words = (createGrid: GridCellProps[], wordArray: string | any[], gridSize: number) => {
+const Words = (createGrid: GridCellProps[], wordArray: any[], gridSize: number) => {
   let addedWord = 0;
   createGrid.filter((item) => item.letter !== '').forEach((item) => item.letter = '');
   let randomStaticX = Math.floor(Math.random() * gridSize) * 10;
@@ -84,37 +84,11 @@ const Words = (createGrid: GridCellProps[], wordArray: string | any[], gridSize:
             });
         } else {
           filteredCells = [];
-          // console.log('wordArray[i]', i, wordArray[i]);
-          // createGrid.map((gridItem) => {
-          //   if (!filteredCells.includes(undefined)
-          //   && filteredCells.length > 0 ? gridItem.y === filteredCells[0] : true
-          //   ) {
-          //     if (filteredCells.length === wordArray[i].length) {
-          //       return filteredCells
-          //         .forEach((item, index) => {
-          //           item.letter = wordArray[i][index];
-          //         });
-          //     }
-          //     filteredCells.push(gridItem);
-
-          //     // filteredCells.push(gridItem);
-          //     // console.log('filteredCells', filteredCells);
-          //   } else {
-          //     return filteredCells = [];
-          //   }
-          // });
         }
-        // return createGrid;
-
-        // .filter((item) => item.letter !== '');
-        // .forEach((item) => item.letter = '');
-        // break;
-        // }
       }
     }
     filteredArray.push(filteredCells);
   }
-  // console.log('filteredArray', filteredArray);
   return filteredArray;
 };
 export default Words;

@@ -1,8 +1,6 @@
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-// import { fas } from '@fortawesome/free-brands-svg-icons'
-import { faFileArrowDown } from '@fortawesome/free-solid-svg-icons';
-import style from './cell.module.scss';
+import './cell.css';
 
 type PlainIconLinkProps = {
   clickHandler: () => void;
@@ -16,9 +14,9 @@ const PlainIconLink: FC<PlainIconLinkProps> = ({
   clickHandler, name, disabled, icon,
 }) => (
   <>
-    <button className={style.plainIconLink} onClick={() => clickHandler()} disabled={disabled}>
-      <div className={style.buttonContentWrapper}>
-        <FontAwesomeIcon className={style.buttonIcon} icon={icon} />
+    <button className="plainIconLink" onClick={() => clickHandler()} disabled={disabled}>
+      <div className="buttonContentWrapper">
+        <FontAwesomeIcon className="buttonIcon" icon={icon} />
         {name}
       </div>
     </button>
