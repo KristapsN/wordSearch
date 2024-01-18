@@ -1,0 +1,341 @@
+import React, { useEffect, useRef, useState } from 'react'
+import Head from 'next/head'
+import Image from 'next/image'
+import { Space_Grotesk, Permanent_Marker, Noto_Sans } from '@next/font/google'
+import styles from '@/styles/Home.module.css'
+import Grid from '@mui/material/Grid'
+import Box from '@mui/material/Box'
+import { spaceGrotesk600, spaceGrotesk700 } from '..'
+import Words from '@/helpers/generateWords'
+import { GridCellProps, generateGrid } from '@/helpers/generateGrid'
+import { useDraw } from '@/hooks/useDraw'
+import freeVerticalSpaceFilter from '@/helpers/freeVerticalSpaceFilter'
+import fillInHorizontalAnswer from '@/helpers/freeHorizontalSpaceFilter'
+import freeSpaceFilter from '@/helpers/freeCpaceFilter'
+import filterAnswerArray from '@/helpers/filterAnswerArray'
+import { randomLetterGenerator } from '@/helpers/randomLetterGenerator'
+import { useWindowSize } from '@/hooks/windowSize'
+import { useAnswerMarking } from '@/hooks/useAnswerMarking'
+
+export interface TextsProps {
+  value: string
+  initialPosition: Point
+  size: number
+  font: string
+}
+export default function Maze() {
+
+  const [createGrid, setCreateGrid] = useState(generateGrid(10))
+  const [textAreaText, setTextAreaText] = useState('')
+  const [editLayout, setEditLayout] = useState(false)
+  const [openAnswerMarkers, setOpenAnswerMarkers] = useState(true)
+  const pdfPreviewHeight = useWindowSize().height ?? 0
+  const pdfPreviewWidth = pdfPreviewHeight * (595.28 / 841.89) * 2
+  const squareSize = (pdfPreviewWidth - pdfPreviewWidth / 5) / 10
+  const wordMazeCornerP1a = useRef<Point>({ x: 0, y: 0 })
+  const answerStartPosition = useRef<Point>({ x: 0, y: 0 })
+  const validAnswers = useRef<string[]>([])
+  const [texts, setTexts] = useState<TextsProps[]>([
+    {
+      value: '',
+      initialPosition: { x: 10, y: 10 },
+      size: 32,
+      font: ''
+    }
+  ])
+
+  let answers: any[][]
+  const rawAnswerArray = useRef<GridCellProps[][]>([[]])
+  const textArray = textAreaText.toUpperCase().split((/\s+/)).filter((word) => word !== '')
+
+  useEffect(() => {
+    const pdfPreviewWidth = pdfPreviewHeight * (595.28 / 841.89) * 2
+    const squareSize = (pdfPreviewWidth - pdfPreviewWidth / 5) / 10
+
+    const newTexts = [...texts]
+    if (texts[0]) {
+      texts[0].initialPosition = {x: (pdfPreviewWidth - squareSize * 10) / 2, y: pdfPreviewHeight * 2 / 12}
+    }
+    setTexts(newTexts)
+
+    wordMazeCornerP1a.current = { x: (pdfPreviewWidth - squareSize * 10) / 2, y: pdfPreviewHeight * 2 / 6 }
+  }, [pdfPreviewHeight])
+
+  const fillGridWithLetters = () => {
+    const newLetterGrid = [...createGrid];
+    const unusedWordIndexes: number[] = [];
+    answers.map((item, index) => item.length === 0 && unusedWordIndexes.push(index));
+    const unusedWords = textArray.filter((_, index) => unusedWordIndexes.includes(index));
+
+    if (unusedWords.length > 0) {
+      // FIlter free horizontal spaces and fill them with unused words
+      const filterVerticalSpaces = freeVerticalSpaceFilter(unusedWords, createGrid);
+      answers = fillInHorizontalAnswer(unusedWords, answers, filterVerticalSpaces);
+
+      const filteredHorizontalFreeSpaces = freeSpaceFilter(unusedWords, createGrid);
+      answers = fillInHorizontalAnswer(unusedWords, answers, filteredHorizontalFreeSpaces);
+    }
+
+    const unusedCells = createGrid.filter((item) => item.letter === '' || item.letter === undefined);
+
+    unusedCells.forEach((item) => { item.letter = randomLetterGenerator() })
+    setCreateGrid(newLetterGrid)
+
+    rawAnswerArray.current = filterAnswerArray(answers)
+
+
+    return rawAnswerArray.current
+  }
+
+  const { canvasRef, onMouseDown, createWordMaze, createAnswerList, createAllPageElements } = useDraw(drawLine)
+  const { answerCanvasRef, createAnswerMarkers } = useAnswerMarking()
+
+  const generateWordSearch = () => {
+    setCreateGrid(generateGrid(10))
+    for (let i = 0; i < 1; i += 1) {
+      answers = Words(createGrid, textArray, 10)
+
+      if (textArray.length !== 0 && textArray.length === answers.length) {
+        const preFilteredAnswerArray = fillGridWithLetters()
+
+        const answerArray = preFilteredAnswerArray.map((item) => item.map(({ letter }) => letter).join(''))
+        validAnswers.current = answerArray.filter((answer) => textArray.includes(answer))
+
+        const pdfPreviewWidth = pdfPreviewHeight * (595.28 / 841.89) * 2
+        const squareSize = (pdfPreviewWidth - pdfPreviewWidth / 5) / 10
+        answerStartPosition.current = {
+          x: (pdfPreviewWidth - squareSize * 10) / 2,
+          y: squareSize * 10 + pdfPreviewHeight * 2 / 6 + squareSize
+        }
+        wordMazeCornerP1a.current = { x: (pdfPreviewWidth - squareSize * 10) / 2, y: pdfPreviewHeight * 2 / 6 }
+        createAllPageElements(
+          createGrid,
+          validAnswers,
+          squareSize,
+          squareSize,
+          wordMazeCornerP1a,
+          answerStartPosition,
+          texts,
+          true
+        )
+        // , pdfPreviewHeight * 2, pdfPreviewHeight * (595.28 / 841.89) * 2)
+
+        // createAnswerMarkers(rawAnswerArray, pdfPreviewHeight * 2, pdfPreviewHeight * (595.28 / 841.89) * 2)
+      }
+      // setSuccess(true);
+
+      // if (tooLongWords.length > 0) {
+      //   handleAlertOpen(`These words are too long: ${tooLongWords.join(', ')}`, 'warning');
+      // }
+    }
+  }
+
+  const showAnswerMarkers = () => {
+    createAnswerMarkers(
+      rawAnswerArray.current,
+      pdfPreviewHeight * 2,
+      pdfPreviewHeight * (595.28 / 841.89) * 2,
+      openAnswerMarkers
+    )
+    setOpenAnswerMarkers(!openAnswerMarkers)
+  }
+
+  function drawLine({ prevPoint, currentPoint, ctx }: Draw) {
+
+    const { x: currX, y: currY } = currentPoint
+    const lineColor = '#000'
+    const lineWidth = 2
+
+    let startPoint = prevPoint ?? currentPoint
+    ctx.beginPath()
+    ctx.lineWidth = lineWidth
+    ctx.strokeStyle = lineColor
+    ctx.moveTo(startPoint.x * 2, startPoint.y * 2)
+    ctx.lineTo(currX * 2, currY * 2)
+    ctx.stroke()
+
+    ctx.fillStyle = lineColor
+    ctx.beginPath()
+    ctx.arc(startPoint.x * 2, startPoint.y * 2, 1, 0, 2 * Math.PI)
+    ctx.fill()
+  }
+
+  // const textArray = textAreaText.toLowerCase().split((/\s+/)).filter((word) => word !== '');
+  const handleWordPuzzleGeneration = () => {
+
+    createAnswerMarkers(rawAnswerArray.current, 0, 0, false)
+    setOpenAnswerMarkers(true)
+    generateWordSearch()
+  }
+
+  const handleLayoutEditing = () => {
+    setOpenAnswerMarkers(true)
+    setEditLayout(!editLayout)
+  }
+
+  const handleTextInput = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const newTexts = [...texts]
+    if (texts[index]) {
+      texts[index].value = event.target.value
+    }
+    setTexts(newTexts)
+
+    createAllPageElements(
+      createGrid,
+      validAnswers,
+      squareSize,
+      squareSize,
+      wordMazeCornerP1a,
+      answerStartPosition,
+      texts,
+      true
+    )
+  }
+
+  const addTextField = () => {
+    const newTexts = [...texts]
+    newTexts.push(
+      {
+        value: '',
+        initialPosition: {x:20, y:20},
+        font: '',
+        size: 24
+      }
+    )
+    setTexts(newTexts)
+  }
+
+  type pdfSizesListProps = {
+    name: string,
+    size: [number, number]
+  }
+  const pdfSizesList: pdfSizesListProps[] = [
+    { name: 'A4', size: [595.28, 841.89] },
+    { name: '8.5 x 11', size: [612, 792] },
+    { name: '8 x 10', size: [576, 720] },
+    { name: '6 x 9', size: [432, 648] },
+    { name: '5.5 x 8.5', size: [396, 612] },
+  ]
+
+  return (
+    <>
+      <Head>
+        <title>Create Next App</title>
+        <meta name="description" content="Generated by create next app" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <Grid container sx={{ flexGrow: 1, backgroundColor: '#FCD0F4', height: "100%" }} className={styles.main2}>
+        <Grid item xs={12} sm={12} md={12} lg={5}>
+          <Grid container className={styles.main}>
+
+            <Box className={styles.slide_down} sx={{ background: "#FCD0F4" }}>
+              <Box
+                className={styles.hide_slide_down}
+                sx={{
+                  borderBottom: '1px solid #FCD0F4',
+                  width: '100%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  height: '6rem',
+                  // bottom: slideBottom,
+                  background: "#030303"
+                }}
+              >
+                <div className={`${styles.logo_title_wrapper}`}>
+                  <Box sx={{ position: 'relative', padding: '2rem', marginRight: '2rem', marginLeft: '0.5rem' }} className={styles.height6}>
+                    <Image
+                      src="/word_search_maze_logo.svg"
+                      alt="Word Search Maze"
+                      fill
+                      sizes="(max-width: 70px) 100vw, (max-width: 58px) 50vw"
+                    />
+                  </Box>
+                  <h2 className={spaceGrotesk700.className}>Enjoy Word Search, Create Your Book and Sell It!</h2>
+                </div>
+              </Box>
+            </Box>
+            <Box>
+              <Box sx={{ mb: '1rem' }}>
+                <button
+                  onClick={addTextField}
+                >
+                  Pievienot tekstu
+                </button>
+                {texts.map(({ value }, index) => {
+                  return (
+                    <Box key={index} >
+                      <input
+                        type="text"
+                        className={styles.text_input}
+                        placeholder='Text'
+                        onChange={(e) => handleTextInput(e, index)}
+                        value={value}
+                      />
+                    </Box>
+                  )
+                })}
+
+              </Box>
+              <Box>
+                <textarea
+                  className={styles.text_input}
+                  placeholder='Leave your email here'
+                  onChange={(e) => setTextAreaText(e.target.value)}
+                  value={textAreaText}
+                />
+                <button
+                  onClick={handleWordPuzzleGeneration}
+                >
+                  Generate
+                </button>
+                <button onClick={showAnswerMarkers}>
+                  Show answers
+                </button>
+                <button onClick={handleLayoutEditing}>
+                  Edit layout
+                </button>
+              </Box>
+            </Box>
+          </Grid>
+
+        </Grid>
+        <Grid item xs={12} sm={12} md={12} lg={7}>
+          <Grid
+            container className={styles.main}
+            sx={{ flexGrow: 1, backgroundColor: '#FCD0F4' }}
+            direction="column"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Box>
+              {!editLayout &&
+                <canvas
+                  ref={answerCanvasRef}
+                  width={pdfPreviewHeight * (595.28 / 841.89) * 2}
+                  height={pdfPreviewHeight * 2}
+                  style={{
+                    width: `${pdfPreviewHeight * (595.28 / 841.89)}px`,
+                    height: `${pdfPreviewHeight}px`,
+                    position: 'absolute'
+                  }}
+                />
+              }
+              <canvas
+                onMouseDown={onMouseDown}
+                ref={canvasRef}
+                width={pdfPreviewHeight * (595.28 / 841.89) * 2}
+                height={pdfPreviewHeight * 2}
+                className={styles.canvas_wrapper}
+                style={{
+                  width: `${pdfPreviewHeight * (595.28 / 841.89)}px`,
+                  height: `${pdfPreviewHeight}px`
+                }}
+              />
+            </Box>
+          </Grid>
+        </Grid>
+      </Grid>
+    </>
+  )
+}

@@ -22,11 +22,11 @@ import { database } from '@/firebase/firebaseClient'
 import { ref, set } from 'firebase/database'
 import { v4 } from "uuid"
 
-const spaceGrotesk700 = Space_Grotesk({ subsets: ['latin'], weight: "700" })
-const spaceGrotesk600 = Space_Grotesk({ subsets: ['latin'], weight: "600" })
-const permanentMarker400 = Permanent_Marker({ subsets: ['latin'], weight: "400" })
-const notoSans400 = Noto_Sans({ subsets: ['latin'], weight: "400" })
-const notoSans700 = Noto_Sans({ subsets: ['latin'], weight: "700" })
+export const spaceGrotesk700 = Space_Grotesk({ subsets: ['latin'], weight: "700" })
+export const spaceGrotesk600 = Space_Grotesk({ subsets: ['latin'], weight: "600" })
+export const permanentMarker400 = Permanent_Marker({ subsets: ['latin'], weight: "400" })
+export const notoSans400 = Noto_Sans({ subsets: ['latin'], weight: "400" })
+export const notoSans700 = Noto_Sans({ subsets: ['latin'], weight: "700" })
 
 export default function Home() {
 
@@ -38,6 +38,7 @@ export default function Home() {
   const [email, setEmail] = useState('')
   const [savedSuccessfully, setSavedSuccessfully] = useState(false)
   const [disableSubmit, setDisableSubmit] = useState(false)
+
   useEffect(() => {
     setSlideBottom('0')
     setSlideTop('0')
@@ -99,6 +100,7 @@ export default function Home() {
     isChecked && writeInDataBase(email)
     isChecked && setEmail('')
   }
+
   return (
     <>
       <Head>
@@ -111,7 +113,7 @@ export default function Home() {
         <Grid item xs={12} sm={12} md={12} lg={6}>
           <Grid container className={styles.main}
             sx={{ flexGrow: 1, backgroundColor: '#030303' }}
-            justifyContent="center"
+            // justifyContent="center"
           >
 
             <Box className={styles.slide_down} sx={{ background: "#FCD0F4" }}>
@@ -205,7 +207,7 @@ export default function Home() {
                             disableTypography
                             primary={<p className={`${notoSans400.className} ${styles.body_text}`}>Organize themed house parties with exciting word search games.</p>}
                           />
-                        </ListItem>,
+                        </ListItem>
                       </List>
                     </div>
                   </div>
@@ -274,7 +276,16 @@ export default function Home() {
                             onMouseLeave={onMouseLeaveSubmit}
                             style={{ opacity: disableSubmit ? '0.4' : '1' }}
                           >
-                            {isHoveringSubmit ?
+                            <Box sx={{ display: 'flex' }}>
+                              <svg width="20" height="20" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+                                viewBox="0 0 24 24" >
+                                <path d="M20.7,13.3l-4-4c-0.4-0.4-1-0.4-1.4,0s-0.4,1,0,1.4l2.3,2.3H9.2c-0.6,0-1.2-0.2-1.6-0.7c-0.4-0.4-0.7-1-0.7-1.6
+	                                V5c0-0.6-0.4-1-1-1S5,4.4,5,5v5.7c0,1.1,0.4,2.2,1.2,3C7,14.6,8.1,15,9.2,15h8.3l-2.3,2.3c-0.4,0.4-0.4,1,0,1.4
+	                                c0.2,0.2,0.5,0.3,0.7,0.3s0.5-0.1,0.7-0.3l4-4C21.1,14.3,21.1,13.7,20.7,13.3z"/>
+                              </svg>
+
+                            </Box>
+                            {/* {isHoveringSubmit ?
                               <Image
                                 src="/arrow_black.svg"
                                 alt="Word Search Maze"
@@ -286,7 +297,7 @@ export default function Home() {
                                 alt="Word Search Maze"
                                 fill
                               />
-                            }
+                            } */}
                           </button>
                         </form>
                       </div>
@@ -357,23 +368,23 @@ export default function Home() {
                     onMouseEnter={onMouseEnter}
                     onMouseLeave={onMouseLeave}
                   >
-                    {isHovering ?
-                      <button type="submit" className={`${styles.social_button} ${styles.social_button_hover}`}>
-                        <Image
-                          src="/tiktok_black.svg"
-                          alt="Word Search Maze"
-                          fill
-                        />
-                      </button>
-                      :
-                      <button type="submit" className={`${styles.social_button}`}>
-                        <Image
-                          src="/tiktok_yellow.svg"
-                          alt="Word Search Maze"
-                          fill
-                        />
-                      </button>
-                    }
+                    {/* {isHovering ? */}
+                    <Box sx={{ display: 'flex', justifyContent: 'center', width: '44px', marginRight: '12px' }}>
+                    <button type="submit" className={`${styles.social_button}`}>
+                      <Box sx={{ display: 'flex' }}>
+                        <svg width="20" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12.75 7.9375C14.28 9.03606 16.1164 9.62633 18 9.625V5.875C16.6076 5.875 15.2723 5.32188 14.2877 4.33731C13.3031
+                      3.35274 12.75 2.01739 12.75 0.625H9V12.625C8.99997 13.0948 8.87388 13.5559 8.63489 13.9603C8.3959 14.3647 8.05276 14.6976
+                      7.64127 14.9242C7.22978 15.1508 6.76502 15.2629 6.29548 15.2486C5.82594 15.2344 5.36882 15.0944 4.97181 14.8433C4.5748 14.5922
+                      4.25245 14.2392 4.03838 13.821C3.82432 13.4029 3.72639 12.9349 3.75481 12.466C3.78323 11.9971 3.93695 11.5445 4.19995 11.1552C4.46294
+                      10.766 4.82557 10.4544 5.25 10.2531V6.35312C4.05617 6.56716 2.94816 7.11732 2.05605 7.93901C1.16394 8.76071 0.524744 9.81984 0.213492
+                      10.9921C-0.0977598 12.1643 -0.0681492 13.4011 0.298848 14.5571C0.665845 15.7131 1.355 16.7404 2.28541 17.5185C3.21583 18.2965 4.34889
+                      18.793 5.5516 18.9497C6.7543 19.1063 7.97674 18.9166 9.07542 18.4029C10.1741 17.8891 11.1034 17.0726 11.7543 16.0492C12.4052 15.0257
+                      12.7506 13.8379 12.75 12.625V7.9375Z" />
+                        </svg>
+                      </Box>
+                    </button>
+                    </Box>
                     <h3 className={`${notoSans700.className}`}>Tik Tok</h3>
                   </div>
                 </Link>
