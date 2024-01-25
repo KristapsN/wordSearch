@@ -4,6 +4,10 @@ import Image from 'next/image'
 import styles from '@/styles/Home.module.css'
 import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import ButtonGroup from '@mui/material/ButtonGroup'
+import Switch from '@mui/material/Switch'
+import AddIcon from '@mui/icons-material/Add'
 import { spaceGrotesk600, spaceGrotesk700 } from '..'
 import Words from '@/helpers/generateWords'
 import { GridCellProps, generateGrid } from '@/helpers/generateGrid'
@@ -14,7 +18,7 @@ import freeSpaceFilter from '@/helpers/freeCpaceFilter'
 import filterAnswerArray from '@/helpers/filterAnswerArray'
 import { randomLetterGenerator } from '@/helpers/randomLetterGenerator'
 import { useWindowSize } from '@/hooks/windowSize'
-import { useAnswerMarking } from '@/hooks/useAnswerMarking'
+import jsPDF from 'jspdf'
 
 export interface TextsProps {
   value: string
@@ -26,8 +30,7 @@ export default function Maze() {
 
   const [createGrid, setCreateGrid] = useState(generateGrid(10))
   const [textAreaText, setTextAreaText] = useState('')
-  const [editLayout, setEditLayout] = useState(false)
-  const [openAnswerMarkers, setOpenAnswerMarkers] = useState(true)
+  const [openAnswerMarkers, setOpenAnswerMarkers] = useState(false)
   const pdfPreviewHeight = useWindowSize().height ?? 0
   const pdfPreviewWidth = pdfPreviewHeight * (595.28 / 841.89) * 2
   const squareSize = (pdfPreviewWidth - pdfPreviewWidth / 5) / 10
@@ -37,7 +40,7 @@ export default function Maze() {
   const [texts, setTexts] = useState<TextsProps[]>([
     {
       value: '',
-      initialPosition: { x: 10, y: 10 },
+      initialPosition: { x: 0, y: 0 },
       size: 32,
       font: ''
     }
@@ -53,11 +56,15 @@ export default function Maze() {
 
     const newTexts = [...texts]
     if (texts[0]) {
-      texts[0].initialPosition = {x: (pdfPreviewWidth - squareSize * 10) / 2, y: pdfPreviewHeight * 2 / 12}
+      texts[0].initialPosition = { x: (pdfPreviewWidth - squareSize * 10) / 2, y: pdfPreviewHeight * 2 / 12 }
     }
     setTexts(newTexts)
 
     wordMazeCornerP1a.current = { x: (pdfPreviewWidth - squareSize * 10) / 2, y: pdfPreviewHeight * 2 / 6 }
+    answerStartPosition.current = {
+      x: (pdfPreviewWidth - squareSize * 10) / 2,
+      y: squareSize * 10 + pdfPreviewHeight * 2 / 6 + squareSize
+    }
   }, [pdfPreviewHeight])
 
   const fillGridWithLetters = () => {
@@ -67,7 +74,7 @@ export default function Maze() {
     const unusedWords = textArray.filter((_, index) => unusedWordIndexes.includes(index));
 
     if (unusedWords.length > 0) {
-      // FIlter free horizontal spaces and fill them with unused words
+      // Filter free horizontal spaces and fill them with unused words
       const filterVerticalSpaces = freeVerticalSpaceFilter(unusedWords, createGrid);
       answers = fillInHorizontalAnswer(unusedWords, answers, filterVerticalSpaces);
 
@@ -86,8 +93,7 @@ export default function Maze() {
     return rawAnswerArray.current
   }
 
-  const { canvasRef, onMouseDown, createWordMaze, createAnswerList, createAllPageElements } = useDraw(drawLine)
-  const { answerCanvasRef, createAnswerMarkers } = useAnswerMarking()
+  const { canvasRef, onMouseDown, createAllPageElements } = useDraw(drawLine)
 
   const generateWordSearch = () => {
     setCreateGrid(generateGrid(10))
@@ -102,11 +108,7 @@ export default function Maze() {
 
         const pdfPreviewWidth = pdfPreviewHeight * (595.28 / 841.89) * 2
         const squareSize = (pdfPreviewWidth - pdfPreviewWidth / 5) / 10
-        answerStartPosition.current = {
-          x: (pdfPreviewWidth - squareSize * 10) / 2,
-          y: squareSize * 10 + pdfPreviewHeight * 2 / 6 + squareSize
-        }
-        wordMazeCornerP1a.current = { x: (pdfPreviewWidth - squareSize * 10) / 2, y: pdfPreviewHeight * 2 / 6 }
+
         createAllPageElements(
           createGrid,
           validAnswers,
@@ -115,6 +117,8 @@ export default function Maze() {
           wordMazeCornerP1a,
           answerStartPosition,
           texts,
+          rawAnswerArray.current,
+          openAnswerMarkers,
           true
         )
         // , pdfPreviewHeight * 2, pdfPreviewHeight * (595.28 / 841.89) * 2)
@@ -130,12 +134,19 @@ export default function Maze() {
   }
 
   const showAnswerMarkers = () => {
-    createAnswerMarkers(
+    createAllPageElements(
+      createGrid,
+      validAnswers,
+      squareSize,
+      squareSize,
+      wordMazeCornerP1a,
+      answerStartPosition,
+      texts,
       rawAnswerArray.current,
-      pdfPreviewHeight * 2,
-      pdfPreviewHeight * (595.28 / 841.89) * 2,
-      openAnswerMarkers
+      !openAnswerMarkers,
+      true
     )
+
     setOpenAnswerMarkers(!openAnswerMarkers)
   }
 
@@ -159,19 +170,6 @@ export default function Maze() {
     ctx.fill()
   }
 
-  // const textArray = textAreaText.toLowerCase().split((/\s+/)).filter((word) => word !== '');
-  const handleWordPuzzleGeneration = () => {
-
-    createAnswerMarkers(rawAnswerArray.current, 0, 0, false)
-    setOpenAnswerMarkers(true)
-    generateWordSearch()
-  }
-
-  const handleLayoutEditing = () => {
-    setOpenAnswerMarkers(true)
-    setEditLayout(!editLayout)
-  }
-
   const handleTextInput = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const newTexts = [...texts]
     if (texts[index]) {
@@ -187,6 +185,8 @@ export default function Maze() {
       wordMazeCornerP1a,
       answerStartPosition,
       texts,
+      rawAnswerArray.current,
+      openAnswerMarkers,
       true
     )
   }
@@ -196,12 +196,23 @@ export default function Maze() {
     newTexts.push(
       {
         value: '',
-        initialPosition: {x:20, y:20},
+        initialPosition: { x: 20, y: 100 },
         font: '',
         size: 24
       }
     )
     setTexts(newTexts)
+  }
+
+  const generatePDF = () => {
+    var imgData = canvasRef.current ? canvasRef.current.toDataURL() : ''
+    var pdf = new jsPDF({
+      format: [595.28 / 4, 841.89 / 4]
+    });
+
+    canvasRef.current && pdf.addImage(imgData, 'JPEG', 0, 0, 595.28 / 4, 841.89 / 4)
+
+    pdf.save("word_maze.pdf");
   }
 
   type pdfSizesListProps = {
@@ -256,11 +267,6 @@ export default function Maze() {
             </Box>
             <Box>
               <Box sx={{ mb: '1rem' }}>
-                <button
-                  onClick={addTextField}
-                >
-                  Pievienot tekstu
-                </button>
                 {texts.map(({ value }, index) => {
                   return (
                     <Box key={index} >
@@ -276,6 +282,16 @@ export default function Maze() {
                 })}
 
               </Box>
+              <Box sx={{ mb: '1rem' }}>
+                <Button
+                  variant='outlined'
+                  size='small'
+                  startIcon={<AddIcon />}
+                  onClick={addTextField}
+                >
+                  Add text field
+                </Button>
+              </Box>
               <Box>
                 <textarea
                   className={styles.text_input}
@@ -283,17 +299,19 @@ export default function Maze() {
                   onChange={(e) => setTextAreaText(e.target.value)}
                   value={textAreaText}
                 />
-                <button
-                  onClick={handleWordPuzzleGeneration}
+                <Button
+                  variant="contained"
+                  onClick={generateWordSearch}
                 >
                   Generate
-                </button>
-                <button onClick={showAnswerMarkers}>
-                  Show answers
-                </button>
-                <button onClick={handleLayoutEditing}>
-                  Edit layout
-                </button>
+                </Button>
+                <Button variant="contained" onClick={generatePDF}>
+                  Download PDF
+                </Button>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <p> Show answers</p>
+                <Switch checked={openAnswerMarkers} onChange={showAnswerMarkers} />
               </Box>
             </Box>
           </Grid>
@@ -308,18 +326,6 @@ export default function Maze() {
             alignItems="center"
           >
             <Box>
-              {!editLayout &&
-                <canvas
-                  ref={answerCanvasRef}
-                  width={pdfPreviewHeight * (595.28 / 841.89) * 2}
-                  height={pdfPreviewHeight * 2}
-                  style={{
-                    width: `${pdfPreviewHeight * (595.28 / 841.89)}px`,
-                    height: `${pdfPreviewHeight}px`,
-                    position: 'absolute'
-                  }}
-                />
-              }
               <canvas
                 onMouseDown={onMouseDown}
                 ref={canvasRef}
@@ -328,7 +334,8 @@ export default function Maze() {
                 className={styles.canvas_wrapper}
                 style={{
                   width: `${pdfPreviewHeight * (595.28 / 841.89)}px`,
-                  height: `${pdfPreviewHeight}px`
+                  height: `${pdfPreviewHeight}px`,
+                  backgroundColor: 'white'
                 }}
               />
             </Box>

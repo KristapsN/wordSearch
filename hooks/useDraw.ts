@@ -5,19 +5,31 @@ import { TextsProps } from "@/pages/maze"
 export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void) => {
   const [mouseDown, setMouseDown] = useState(false)
 
+  interface DraggingProps {
+    maze: boolean
+    answers: boolean
+    texts: boolean[]
+  }
+
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const prevPoint = useRef<null | Point>(null)
-  const clickedPoint = useRef<null | Point>(null)
-  const wordMazeCornerP1 = useRef<Point>({ x: -1, y: -1 })
+  const wordMazeCornerP1 = useRef<Point>({ x: 0, y: 0 })
   const answerCornerP1 = useRef<Point>({ x: 0, y: 0 })
   const createdGrid = useRef<GridCellProps[]>()
   const squareSize = useRef<number>(0)
   const answerSpacing = useRef<number>(0)
   const answers = useRef<string[]>([])
   const resizing = useRef<boolean>(false)
-  const dragging = useRef<boolean>(false)
+  const answerFontSize = useRef<number>(0)
+  const dragging = useRef<DraggingProps>({
+    maze: false,
+    answers: false,
+    texts: []
+  })
   const initialWordMazeGeneration = useRef<boolean>(true)
   const texts = useRef<TextsProps[]>([])
+  const rawAnswers = useRef<GridCellProps[][]>([[]])
+  const showAnswerMarkings = useRef<boolean>(false)
 
   const onMouseDown = () => setMouseDown(true)
 
@@ -49,7 +61,27 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
       })
     }
 
-    // createAnswerList(answers.current, answerSpacing.current, answerCornerP1.current)
+
+    if (dragging.current.maze === true) {
+      ctx.strokeStyle = "#07E2F0"
+      ctx.strokeRect(
+        startPosition.current.x,
+        startPosition.current.y,
+        squareSize.current * 10,
+        squareSize.current * 10
+      )
+      ctx.strokeStyle = "red"
+      ctx.rect(
+        startPosition.current.x - (squareSize.current / 10),
+        startPosition.current.y - (squareSize.current / 10),
+        squareSize.current / 5,
+        squareSize.current / 5
+      )
+      ctx.fillStyle = "red"
+      ctx.fill()
+      ctx.fillStyle = "black"
+      ctx.strokeStyle = "black"
+    }
   }
 
   const createAnswerList = (startPosition: Point) => {
@@ -59,10 +91,10 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const fontSize = answerSpacing.current / 3
+    answerFontSize.current = answerSpacing.current / 3
 
     answers.current.map((answer, index) => {
-      ctx.font = `${fontSize}px serif`
+      ctx.font = `${answerFontSize.current}px serif`
 
       const startCoordinatesY = startPosition.y
       const startCoordinatesX = startPosition.x
@@ -71,15 +103,102 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
 
       ctx.strokeRect(
         startCoordinatesX + changingCoordinatesX,
-        startCoordinatesY + changingCoordinatesY - fontSize / 2,
-        fontSize / 2,
-        fontSize / 2
+        startCoordinatesY + changingCoordinatesY - answerFontSize.current / 2,
+        answerFontSize.current / 2,
+        answerFontSize.current / 2
       )
-      ctx.fillText(answer.toUpperCase(), startCoordinatesX + changingCoordinatesX + fontSize, startCoordinatesY + changingCoordinatesY)
+      ctx.fillText(answer.toUpperCase(), startCoordinatesX + changingCoordinatesX + answerFontSize.current, startCoordinatesY + changingCoordinatesY)
     })
+
+    if (dragging.current.answers === true) {
+      ctx.strokeStyle = "#07E2F0"
+      ctx.strokeRect(
+        startPosition.x,
+        startPosition.y - answerFontSize.current,
+        answerSpacing.current * 10,
+        answerFontSize.current * 1.4 * Math.ceil(answers.current.length / 4)
+      )
+      ctx.strokeStyle = "black"
+    }
   }
 
-  const createTexts = (startPosition: Point, fontSize: number, text: string) => {
+  const createAnswerMarkers = (rawAnswerArray: GridCellProps[][], startPosition: React.MutableRefObject<Point>) => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    ctx.strokeStyle = "red"
+
+    const answerMarkerSpacing = squareSize.current / 8
+    const referenceSquareDiagonalSizes = Math.sqrt(2 * Math.pow(squareSize.current, 2))
+
+    rawAnswerArray.map((rawAnswers) => {
+      const startCoordinatesX = startPosition.current.x
+      const startCoordinatesY = rawAnswers[0].y / 10 * squareSize.current + startPosition.current.y
+      const answerLength = (rawAnswers[rawAnswers.length - 1].x - rawAnswers[0].x + 10) / 10
+      const answerHeight = (rawAnswers[rawAnswers.length - 1].y - rawAnswers[0].y + 10) / 10
+
+      if (answerLength === rawAnswers.length && answerHeight === 1) {
+
+        ctx.roundRect(
+          startCoordinatesX + (rawAnswers[0].x / 10) * squareSize.current + answerMarkerSpacing,
+          startCoordinatesY + answerMarkerSpacing,
+          (rawAnswers[rawAnswers.length - 1].x - rawAnswers[0].x + 10) / 10 * squareSize.current - answerMarkerSpacing * 2,
+          squareSize.current - answerMarkerSpacing * 2,
+          [40]
+        )
+      }
+
+      if (answerLength === 1 && answerHeight === rawAnswers.length) {
+        ctx.roundRect(
+          startCoordinatesX + (rawAnswers[0].x / 10) * squareSize.current + answerMarkerSpacing,
+          startCoordinatesY + answerMarkerSpacing,
+          squareSize.current - answerMarkerSpacing * 2,
+          (rawAnswers[rawAnswers.length - 1].y - rawAnswers[0].y + 10) / 10 * squareSize.current - answerMarkerSpacing * 2,
+          [40]
+        )
+      }
+      if (answerLength !== 1 && answerHeight !== 1 && rawAnswers[0].y < rawAnswers[rawAnswers.length - 1].y) {
+        ctx.translate(
+          (startCoordinatesX + (rawAnswers[0].x / 10) * squareSize.current) + squareSize.current / 2,
+          startCoordinatesY,
+        )
+        ctx.rotate((45 * Math.PI) / 180)
+        ctx.roundRect(
+          0,
+          0,
+          (rawAnswers[rawAnswers.length - 1].x - rawAnswers[0].x + 10) / 10 * referenceSquareDiagonalSizes - (squareSize.current / 2 + answerMarkerSpacing),
+          squareSize.current - answerMarkerSpacing * 2,
+          [40]
+        )
+        ctx.rotate((-45 * Math.PI) / 180)
+        ctx.setTransform(1, 0, 0, 1, 0, 0)
+      }
+
+      if (answerLength !== 1 && answerHeight !== 1 && rawAnswers[0].y > rawAnswers[rawAnswers.length - 1].y) {
+        ctx.translate(
+          (startCoordinatesX + (rawAnswers[0].x / 10) * squareSize.current),
+          startCoordinatesY + squareSize.current / 2,
+        )
+        ctx.rotate((-45 * Math.PI) / 180)
+        ctx.roundRect(
+          0,
+          0,
+          (rawAnswers[rawAnswers.length - 1].x - rawAnswers[0].x + 10) / 10 * referenceSquareDiagonalSizes - (squareSize.current / 2 + answerMarkerSpacing),
+          squareSize.current - answerMarkerSpacing * 2,
+          [40]
+        )
+        ctx.rotate((45 * Math.PI) / 180)
+        ctx.setTransform(1, 0, 0, 1, 0, 0)
+      }
+
+      ctx.stroke();
+    })
+    ctx.strokeStyle = "black"
+  }
+
+  const createTexts = (startPosition: Point, fontSize: number, text: string, index: number) => {
     const canvas = canvasRef.current
     if (!canvas) return
 
@@ -93,6 +212,17 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
 
     ctx.fillText(text, startCoordinatesX, startCoordinatesY)
 
+    if (dragging.current.texts[index] === true) {
+      ctx.strokeStyle = "#07E2F0"
+      ctx.strokeRect(
+        startPosition.x,
+        startPosition.y - answerFontSize.current,
+        ctx.measureText(text).width,
+        answerFontSize.current * 1.4
+      )
+      ctx.strokeStyle = "black"
+    }
+
   }
 
   const createAllPageElements = (
@@ -103,6 +233,8 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
     startPosition: React.MutableRefObject<Point>,
     answerStartPosition: React.MutableRefObject<Point>,
     inputTexts: TextsProps[],
+    rawAnswerArray: GridCellProps[][],
+    showAnswers: boolean,
     regenerate = false
   ) => {
     const canvas = canvasRef.current
@@ -111,7 +243,8 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    ctx.clearRect(0,0, canvas.width, canvas.height)
+    ctx.reset()
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
 
     if (regenerate && squareSize.current !== 0) {
       squareSize.current
@@ -122,29 +255,33 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
     if (initialWordMazeGeneration.current === true) {
       initialWordMazeGeneration.current = false
       wordMazeCornerP1.current = startPosition.current
+      answerCornerP1.current = answerStartPosition.current
       squareSize.current = initialSquareSize
     } else {
       startPosition.current = wordMazeCornerP1.current
+      answerStartPosition.current = answerCornerP1.current
     }
 
     texts.current = inputTexts
 
     answerSpacing.current = initialAnswerSpacing
     answers.current = initialAnswers.current
-    answerCornerP1.current = answerStartPosition.current
+    rawAnswers.current = rawAnswerArray
+    showAnswerMarkings.current = showAnswers
 
     createWordMaze(createGrid, startPosition)
     createAnswerList(answerCornerP1.current)
-    texts.current.map(({initialPosition, size, value}) => {
-      createTexts(initialPosition, size, value)
+    texts.current.map(({ initialPosition, size, value}, index) => {
+      createTexts(initialPosition, size, value, index)
     })
+    showAnswerMarkings.current && createAnswerMarkers(rawAnswers.current, startPosition)
   }
 
-  interface currentPointProps {
+  interface CurrentPointProps {
     x: number
     y: number
   }
-  const clickedInWordMaze = ({ x, y }: currentPointProps) => {
+  const clickedInWordMaze = ({ x, y }: CurrentPointProps) => {
     if (
       wordMazeCornerP1.current.x <= x * 2 &&
       wordMazeCornerP1.current.x + squareSize.current * 10 >= x * 2 &&
@@ -153,6 +290,34 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
     ) {
       return true
     } else return false
+  }
+
+  const clickedInAnswerList = ({ x, y }: CurrentPointProps) => {
+    if (
+      answerCornerP1.current.x <= x * 2 &&
+      answerCornerP1.current.x + squareSize.current * 10 >= x * 2 &&
+      answerCornerP1.current.y <= y * 2 + answerFontSize.current &&
+      answerCornerP1.current.y + squareSize.current * 4 >= y * 2
+    ) {
+      return true
+    } else return false
+  }
+
+  const clickedInText = ({ x, y }: CurrentPointProps) => {
+    return texts.current.some(({ initialPosition, value, size }, index) => {
+      if (
+        initialPosition.x <= x * 2 &&
+        initialPosition.x + value.length * size * 0.6 >= x * 2 &&
+        initialPosition.y - size <= y * 2 &&
+        initialPosition.y >= y * 2
+      ) {
+        dragging.current.texts[index] = true
+        dragging.current.maze = false
+        dragging.current.answers = false
+      } else {
+        dragging.current.texts[index] = false
+      }
+    })
   }
 
   const checkCloseEnough = (p1: number | undefined, p2: number | undefined) => {
@@ -183,30 +348,70 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
       const resizingDirectionX = prevPoint.current ? (prevPoint.current.x - currentPoint.x) : 0
       const resizingDirectionY = prevPoint.current ? (prevPoint.current.y - currentPoint.y) : 0
 
-      if (clickedInWordMaze(currentPoint)) {
-        dragging.current = true
+      const dragElement = (element: React.MutableRefObject<Point>, isDragging: boolean) => {
+        if (isDragging === true && resizing.current === false) {
+          resizing.current = false
+
+          element.current = { x: element.current.x - resizingDirectionX * 2, y: element.current.y - resizingDirectionY * 2 }
+
+          if (createdGrid.current !== undefined && squareSize.current) {
+            createAllPageElements(
+              createdGrid.current,
+              answers,
+              squareSize.current,
+              answerSpacing.current,
+              wordMazeCornerP1,
+              answerCornerP1,
+              texts.current,
+              rawAnswers.current,
+              showAnswerMarkings.current
+            )
+          }
+        }
       }
+
+      const dragTextElement = (index: number, isDragging: boolean) => {
+        if (isDragging === true && resizing.current === false) {
+          resizing.current = false
+
+          texts.current[index].initialPosition = {
+            x: texts.current[index].initialPosition.x - resizingDirectionX * 2,
+            y: texts.current[index].initialPosition.y - resizingDirectionY * 2
+          }
+
+          if (createdGrid.current !== undefined && squareSize.current) {
+            createAllPageElements(
+              createdGrid.current,
+              answers,
+              squareSize.current,
+              answerSpacing.current,
+              wordMazeCornerP1,
+              answerCornerP1,
+              texts.current,
+              rawAnswers.current,
+              showAnswerMarkings.current
+            )
+          }
+        }
+      }
+
+      if (dragging.current.maze === false) {
+        dragElement(answerCornerP1, dragging.current.answers)
+      }
+
+      if (dragging.current.answers === false) {
+        dragElement(wordMazeCornerP1, dragging.current.maze)
+      }
+
+      if (dragging.current.answers === false && dragging.current.maze === false) {
+        dragging.current.texts.map((drag, index) => {
+          dragTextElement(index, drag)
+        })
+      }
+
 
       if (checkCloseEnough(currentPoint.x * 2, wordMazeCornerP1.current?.x) && checkCloseEnough(currentPoint.y * 2, wordMazeCornerP1.current?.y)) {
         resizing.current = true
-      }
-
-      if (dragging.current === true && resizing.current === false) {
-        resizing.current = false
-
-        wordMazeCornerP1.current = { x: wordMazeCornerP1.current.x - resizingDirectionX * 2, y: wordMazeCornerP1.current.y - resizingDirectionY * 2 }
-
-        if (createdGrid.current !== undefined && squareSize.current) {
-          createAllPageElements(
-            createdGrid.current,
-            answers,
-            squareSize.current,
-            answerSpacing.current,
-            wordMazeCornerP1,
-            answerCornerP1,
-            texts.current
-          )
-        }
       }
 
       if (resizing.current === true) {
@@ -220,7 +425,9 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
             answerSpacing.current,
             wordMazeCornerP1,
             answerCornerP1,
-            texts.current
+            texts.current,
+            rawAnswers.current,
+            showAnswerMarkings.current
           )
         }
       }
@@ -228,21 +435,6 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
       // onDraw({ ctx, currentPoint, prevPoint: prevPoint.current })
       prevPoint.current = currentPoint
     }
-
-    // const clickHandler = (e: MouseEvent) => {
-    //   // if (!mouseDown) return
-
-    //   const currentPoint = computePointInCanvas(e)
-
-    //   const ctx = canvasRef.current?.getContext('2d')
-    //   if (!ctx || !currentPoint) return
-
-    //   // startCoordinatesX + (x / 10) * squareSize, startCoordinatesY
-
-
-
-    //   // clickedInWordMaze(currentPoint) ? clickedPoint.current = currentPoint : clickedPoint.current = null
-    // }
 
     const computePointInCanvas = (e: MouseEvent) => {
       const canvas = canvasRef.current
@@ -259,22 +451,59 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
       setMouseDown(false)
       prevPoint.current = null
       resizing.current = false
-      dragging.current = false
+      // dragging.current.maze = false
+      // dragging.current.answers = false
+      // dragging.current.texts.map((text) => text = false)
     }
 
-    // const mouseDownHandler = () => {
-    //   // setClickDownCoordinates(true)
-    // }
+    const mouseDownHandler = (e: MouseEvent) => {
+      const currentPoint = computePointInCanvas(e)
+
+      if (currentPoint && clickedInWordMaze(currentPoint)) {
+        dragging.current.maze = true
+        dragging.current.answers = false
+        dragging.current.texts.map((text) => text = false)
+      } else {
+        dragging.current.maze = false
+      }
+
+      if (currentPoint && clickedInAnswerList(currentPoint)) {
+        dragging.current.answers = true
+        dragging.current.maze = false
+        dragging.current.texts.map((text) => text = false)
+      } else {
+        dragging.current.answers = false
+      }
+
+      currentPoint && clickedInText(currentPoint)
+
+      if (createdGrid.current !== undefined && squareSize.current) {
+        createAllPageElements(
+          createdGrid.current,
+          answers,
+          squareSize.current,
+          answerSpacing.current,
+          wordMazeCornerP1,
+          answerCornerP1,
+          texts.current,
+          rawAnswers.current,
+          showAnswerMarkings.current
+        )
+      }
+    }
 
     canvasRef.current?.addEventListener('mousemove', handler)
     window.addEventListener('mouseup', mouseUpHandler)
 
-    // canvasRef.current?.addEventListener('mousedown', clickHandler)
-    // window.addEventListener('mousedown', mouseDownHandler)
+    canvasRef.current?.addEventListener('mousedown', handler)
+    window.addEventListener('mousedown', mouseDownHandler)
 
     return () => {
       canvasRef.current?.removeEventListener('mousemove', handler)
       window.removeEventListener('mouseup', mouseUpHandler)
+
+      canvasRef.current?.removeEventListener('mousedown', handler)
+      window.removeEventListener('mousedown', mouseDownHandler)
     }
   }, [onDraw])
 
