@@ -26,13 +26,20 @@ export interface TextsProps {
   size: number
   font: string
 }
+
+type pdfSizesListProps = {
+  name: string,
+  size: [number, number]
+}
+
 export default function Maze() {
 
   const [createGrid, setCreateGrid] = useState(generateGrid(10))
+  const [pdfSize, setPdfSize] = useState([595.28, 841.89])
   const [textAreaText, setTextAreaText] = useState('')
   const [openAnswerMarkers, setOpenAnswerMarkers] = useState(false)
   const pdfPreviewHeight = useWindowSize().height ?? 0
-  const pdfPreviewWidth = pdfPreviewHeight * (595.28 / 841.89) * 2
+  const pdfPreviewWidth = pdfPreviewHeight * (pdfSize[0]/ pdfSize[1]) * 2
   const squareSize = (pdfPreviewWidth - pdfPreviewWidth / 5) / 10
   const wordMazeCornerP1a = useRef<Point>({ x: 0, y: 0 })
   const answerStartPosition = useRef<Point>({ x: 0, y: 0 })
@@ -51,12 +58,9 @@ export default function Maze() {
   const textArray = textAreaText.toUpperCase().split((/\s+/)).filter((word) => word !== '')
 
   useEffect(() => {
-    const pdfPreviewWidth = pdfPreviewHeight * (595.28 / 841.89) * 2
-    const squareSize = (pdfPreviewWidth - pdfPreviewWidth / 5) / 10
-
     const newTexts = [...texts]
     if (texts[0]) {
-      texts[0].initialPosition = { x: (pdfPreviewWidth - squareSize * 10) / 2, y: pdfPreviewHeight * 2 / 12 }
+      texts[0].initialPosition = { x: pdfPreviewWidth / 2, y: pdfPreviewHeight * 2 / 12 }
     }
     setTexts(newTexts)
 
@@ -105,9 +109,6 @@ export default function Maze() {
 
         const answerArray = preFilteredAnswerArray.map((item) => item.map(({ letter }) => letter).join(''))
         validAnswers.current = answerArray.filter((answer) => textArray.includes(answer))
-
-        const pdfPreviewWidth = pdfPreviewHeight * (595.28 / 841.89) * 2
-        const squareSize = (pdfPreviewWidth - pdfPreviewWidth / 5) / 10
 
         createAllPageElements(
           createGrid,
@@ -193,12 +194,13 @@ export default function Maze() {
 
   const addTextField = () => {
     const newTexts = [...texts]
+    const fontSize = 24
     newTexts.push(
       {
         value: '',
-        initialPosition: { x: 20, y: 100 },
+        initialPosition: { x: pdfPreviewWidth / 2, y: pdfPreviewHeight * 2 / 12 + fontSize },
         font: '',
-        size: 24
+        size: fontSize
       }
     )
     setTexts(newTexts)
@@ -207,18 +209,18 @@ export default function Maze() {
   const generatePDF = () => {
     var imgData = canvasRef.current ? canvasRef.current.toDataURL() : ''
     var pdf = new jsPDF({
-      format: [595.28 / 4, 841.89 / 4]
+      format: [pdfSize[0] / 4, pdfSize[1] / 4]
     });
 
-    canvasRef.current && pdf.addImage(imgData, 'JPEG', 0, 0, 595.28 / 4, 841.89 / 4)
+    canvasRef.current && pdf.addImage(imgData, 'JPEG', 0, 0, pdfSize[0]/ 4, pdfSize[1] / 4)
 
     pdf.save("word_maze.pdf");
   }
 
-  type pdfSizesListProps = {
-    name: string,
-    size: [number, number]
+  const handlePdfSizeChange = (size: pdfSizesListProps['size']) => {
+    setPdfSize(size)
   }
+
   const pdfSizesList: pdfSizesListProps[] = [
     { name: 'A4', size: [595.28, 841.89] },
     { name: '8.5 x 11', size: [612, 792] },
@@ -267,6 +269,22 @@ export default function Maze() {
             </Box>
             <Box>
               <Box sx={{ mb: '1rem' }}>
+              <ButtonGroup size="small" aria-label="small button group">
+                {pdfSizesList.map(({name, size}) => (
+                  <Button
+                    sx={{backgroundColor: pdfSize[0] === size[0] ? 'white' : 'none'}}
+                    onClick={() => handlePdfSizeChange(size)}
+                    variant="outlined"
+                    key={name}
+                  >
+                    {name}
+                  </Button>
+                )
+                )}
+
+              </ButtonGroup>
+              </Box>
+              <Box sx={{ mb: '1rem' }}>
                 {texts.map(({ value }, index) => {
                   return (
                     <Box key={index} >
@@ -280,7 +298,6 @@ export default function Maze() {
                     </Box>
                   )
                 })}
-
               </Box>
               <Box sx={{ mb: '1rem' }}>
                 <Button
@@ -329,11 +346,11 @@ export default function Maze() {
               <canvas
                 onMouseDown={onMouseDown}
                 ref={canvasRef}
-                width={pdfPreviewHeight * (595.28 / 841.89) * 2}
+                width={pdfPreviewHeight * (pdfSize[0]/ pdfSize[1]) * 2}
                 height={pdfPreviewHeight * 2}
                 className={styles.canvas_wrapper}
                 style={{
-                  width: `${pdfPreviewHeight * (595.28 / 841.89)}px`,
+                  width: `${pdfPreviewHeight * (pdfSize[0]/ pdfSize[1])}px`,
                   height: `${pdfPreviewHeight}px`,
                   backgroundColor: 'white'
                 }}

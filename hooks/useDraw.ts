@@ -210,12 +210,13 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
     const startCoordinatesY = startPosition.y
     const startCoordinatesX = startPosition.x
 
+    ctx.textAlign = "center"
     ctx.fillText(text, startCoordinatesX, startCoordinatesY)
 
     if (dragging.current.texts[index] === true) {
       ctx.strokeStyle = "#07E2F0"
       ctx.strokeRect(
-        startPosition.x,
+        startPosition.x - ctx.measureText(text).width / 2,
         startPosition.y - answerFontSize.current,
         ctx.measureText(text).width,
         answerFontSize.current * 1.4
@@ -297,17 +298,23 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
       answerCornerP1.current.x <= x * 2 &&
       answerCornerP1.current.x + squareSize.current * 10 >= x * 2 &&
       answerCornerP1.current.y <= y * 2 + answerFontSize.current &&
-      answerCornerP1.current.y + squareSize.current * 4 >= y * 2
+      answerCornerP1.current.y + answerFontSize.current * 1.4 * Math.ceil(answers.current.length / 4) >= y * 2
     ) {
       return true
     } else return false
   }
 
   const clickedInText = ({ x, y }: CurrentPointProps) => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
     return texts.current.some(({ initialPosition, value, size }, index) => {
       if (
-        initialPosition.x <= x * 2 &&
-        initialPosition.x + value.length * size * 0.6 >= x * 2 &&
+        initialPosition.x - ctx.measureText(value).width / 2<= x * 2 &&
+        initialPosition.x + ctx.measureText(value).width / 2>= x * 2 &&
         initialPosition.y - size <= y * 2 &&
         initialPosition.y >= y * 2
       ) {
