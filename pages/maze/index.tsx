@@ -8,6 +8,8 @@ import Button from '@mui/material/Button'
 import ButtonGroup from '@mui/material/ButtonGroup'
 import Switch from '@mui/material/Switch'
 import AddIcon from '@mui/icons-material/Add'
+import DeleteIcon from '@mui/icons-material/Delete'
+import UploadIcon from '@mui/icons-material/Upload'
 import { spaceGrotesk600, spaceGrotesk700 } from '..'
 import Words from '@/helpers/generateWords'
 import { GridCellProps, generateGrid } from '@/helpers/generateGrid'
@@ -19,6 +21,7 @@ import filterAnswerArray from '@/helpers/filterAnswerArray'
 import { randomLetterGenerator } from '@/helpers/randomLetterGenerator'
 import { useWindowSize } from '@/hooks/windowSize'
 import jsPDF from 'jspdf'
+import ImageUploading, { ImageListType } from 'react-images-uploading'
 
 export interface TextsProps {
   value: string
@@ -32,6 +35,11 @@ type pdfSizesListProps = {
   size: [number, number]
 }
 
+export interface ImagesProps {
+  imageList: ImageListType
+  addUpdateIndex: number[] | undefined
+}
+
 export default function Maze() {
 
   const [createGrid, setCreateGrid] = useState(generateGrid(10))
@@ -39,7 +47,7 @@ export default function Maze() {
   const [textAreaText, setTextAreaText] = useState('')
   const [openAnswerMarkers, setOpenAnswerMarkers] = useState(false)
   const pdfPreviewHeight = useWindowSize().height ?? 0
-  const pdfPreviewWidth = pdfPreviewHeight * (pdfSize[0]/ pdfSize[1]) * 2
+  const pdfPreviewWidth = pdfPreviewHeight * (pdfSize[0] / pdfSize[1]) * 2
   const squareSize = (pdfPreviewWidth - pdfPreviewWidth / 5) / 10
   const wordMazeCornerP1a = useRef<Point>({ x: 0, y: 0 })
   const answerStartPosition = useRef<Point>({ x: 0, y: 0 })
@@ -52,6 +60,15 @@ export default function Maze() {
       font: ''
     }
   ])
+  const [images, setImages] = useState<ImagesProps>();
+  const maxNumber = 69;
+
+  const onChange = (
+    imageList: ImageListType,
+    addUpdateIndex: number[] | undefined
+  ) => {
+    setImages({ imageList, addUpdateIndex: addUpdateIndex })
+  }
 
   let answers: any[][]
   const rawAnswerArray = useRef<GridCellProps[][]>([[]])
@@ -63,13 +80,32 @@ export default function Maze() {
       texts[0].initialPosition = { x: pdfPreviewWidth / 2, y: pdfPreviewHeight * 2 / 12 }
     }
     setTexts(newTexts)
+  }, [pdfPreviewHeight])
 
+  useEffect(() => {
     wordMazeCornerP1a.current = { x: (pdfPreviewWidth - squareSize * 10) / 2, y: pdfPreviewHeight * 2 / 6 }
     answerStartPosition.current = {
       x: (pdfPreviewWidth - squareSize * 10) / 2,
       y: squareSize * 10 + pdfPreviewHeight * 2 / 6 + squareSize
     }
-  }, [pdfPreviewHeight])
+
+
+    if (pdfPreviewWidth !== 0) {
+      createAllPageElements(
+        createGrid,
+        validAnswers,
+        squareSize,
+        squareSize,
+        wordMazeCornerP1a,
+        answerStartPosition,
+        texts,
+        rawAnswerArray.current,
+        images,
+        openAnswerMarkers,
+        true
+      )
+    }
+  }, [pdfPreviewHeight, images, texts])
 
   const fillGridWithLetters = () => {
     const newLetterGrid = [...createGrid];
@@ -119,6 +155,7 @@ export default function Maze() {
           answerStartPosition,
           texts,
           rawAnswerArray.current,
+          images,
           openAnswerMarkers,
           true
         )
@@ -144,6 +181,7 @@ export default function Maze() {
       answerStartPosition,
       texts,
       rawAnswerArray.current,
+      images,
       !openAnswerMarkers,
       true
     )
@@ -178,18 +216,19 @@ export default function Maze() {
     }
     setTexts(newTexts)
 
-    createAllPageElements(
-      createGrid,
-      validAnswers,
-      squareSize,
-      squareSize,
-      wordMazeCornerP1a,
-      answerStartPosition,
-      texts,
-      rawAnswerArray.current,
-      openAnswerMarkers,
-      true
-    )
+    // createAllPageElements(
+    //   createGrid,
+    //   validAnswers,
+    //   squareSize,
+    //   squareSize,
+    //   wordMazeCornerP1a,
+    //   answerStartPosition,
+    //   texts,
+    //   rawAnswerArray.current,
+    //   images,
+    //   openAnswerMarkers,
+    //   true
+    // )
   }
 
   const addTextField = () => {
@@ -212,7 +251,7 @@ export default function Maze() {
       format: [pdfSize[0] / 4, pdfSize[1] / 4]
     });
 
-    canvasRef.current && pdf.addImage(imgData, 'JPEG', 0, 0, pdfSize[0]/ 4, pdfSize[1] / 4)
+    canvasRef.current && pdf.addImage(imgData, 'JPEG', 0, 0, pdfSize[0] / 4, pdfSize[1] / 4)
 
     pdf.save("word_maze.pdf");
   }
@@ -269,20 +308,20 @@ export default function Maze() {
             </Box>
             <Box>
               <Box sx={{ mb: '1rem' }}>
-              <ButtonGroup size="small" aria-label="small button group">
-                {pdfSizesList.map(({name, size}) => (
-                  <Button
-                    sx={{backgroundColor: pdfSize[0] === size[0] ? 'white' : 'none'}}
-                    onClick={() => handlePdfSizeChange(size)}
-                    variant="outlined"
-                    key={name}
-                  >
-                    {name}
-                  </Button>
-                )
-                )}
+                <ButtonGroup size="small" aria-label="small button group">
+                  {pdfSizesList.map(({ name, size }) => (
+                    <Button
+                      sx={{ backgroundColor: pdfSize[0] === size[0] ? 'white' : 'none' }}
+                      onClick={() => handlePdfSizeChange(size)}
+                      variant="outlined"
+                      key={name}
+                    >
+                      {name}
+                    </Button>
+                  )
+                  )}
 
-              </ButtonGroup>
+                </ButtonGroup>
               </Box>
               <Box sx={{ mb: '1rem' }}>
                 {texts.map(({ value }, index) => {
@@ -308,6 +347,48 @@ export default function Maze() {
                 >
                   Add text field
                 </Button>
+              </Box>
+              <Box>
+                <ImageUploading
+                  multiple
+                  value={images?.imageList ?? []}
+                  onChange={onChange}
+                  maxNumber={maxNumber}
+                >
+                  {({
+                    imageList,
+                    onImageUpload,
+                    onImageRemoveAll,
+                    onImageUpdate,
+                    onImageRemove,
+                    isDragging,
+                    dragProps
+                  }) => (
+                    // write your building UI
+                    <div className="upload__image-wrapper">
+                      <Button
+                        variant='outlined'
+                        style={isDragging ? { color: "red" } : undefined}
+                        onClick={onImageUpload}
+                        startIcon={<UploadIcon />}
+                        {...dragProps}
+                      >
+                        Click or Drop here
+                      </Button>
+                      &nbsp;
+                      <Button variant='outlined' onClick={onImageRemoveAll} startIcon={<DeleteIcon />}>Remove all images</Button>
+                      {imageList.map((image, index) => (
+                        <div key={index} className="image-item">
+                          <img src={image.dataURL} alt="" width="100" />
+                          <div className="image-item__btn-wrapper">
+                            <button onClick={() => onImageUpdate(index)}>Update</button>
+                            <button onClick={() => onImageRemove(index)}>Remove</button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </ImageUploading>
               </Box>
               <Box>
                 <textarea
@@ -346,11 +427,11 @@ export default function Maze() {
               <canvas
                 onMouseDown={onMouseDown}
                 ref={canvasRef}
-                width={pdfPreviewHeight * (pdfSize[0]/ pdfSize[1]) * 2}
+                width={pdfPreviewHeight * (pdfSize[0] / pdfSize[1]) * 2}
                 height={pdfPreviewHeight * 2}
                 className={styles.canvas_wrapper}
                 style={{
-                  width: `${pdfPreviewHeight * (pdfSize[0]/ pdfSize[1])}px`,
+                  width: `${pdfPreviewHeight * (pdfSize[0] / pdfSize[1])}px`,
                   height: `${pdfPreviewHeight}px`,
                   backgroundColor: 'white'
                 }}

@@ -1,6 +1,6 @@
 import { GridCellProps } from "@/helpers/generateGrid"
 import { useEffect, useRef, useState } from "react"
-import { TextsProps } from "@/pages/maze"
+import { ImagesProps, TextsProps } from "@/pages/maze"
 
 export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void) => {
   const [mouseDown, setMouseDown] = useState(false)
@@ -9,12 +9,14 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
     maze: boolean
     answers: boolean
     texts: boolean[]
+    images: boolean[]
   }
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const prevPoint = useRef<null | Point>(null)
   const wordMazeCornerP1 = useRef<Point>({ x: 0, y: 0 })
   const answerCornerP1 = useRef<Point>({ x: 0, y: 0 })
+  const imageCornerP1 = useRef<Point[]>([])
   const createdGrid = useRef<GridCellProps[]>()
   const squareSize = useRef<number>(0)
   const answerSpacing = useRef<number>(0)
@@ -24,12 +26,14 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
   const dragging = useRef<DraggingProps>({
     maze: false,
     answers: false,
-    texts: []
+    texts: [],
+    images: []
   })
   const initialWordMazeGeneration = useRef<boolean>(true)
   const texts = useRef<TextsProps[]>([])
   const rawAnswers = useRef<GridCellProps[][]>([[]])
   const showAnswerMarkings = useRef<boolean>(false)
+  const pdfImages = useRef<ImagesProps>()
 
   const onMouseDown = () => setMouseDown(true)
 
@@ -226,6 +230,29 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
 
   }
 
+  const createImage = (dataURL: string, { x, y }: CurrentPointProps, index: number) => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    const image = new Image()
+    image.src = dataURL
+
+    ctx.drawImage(image, x, y)
+
+    if (dragging.current.images[index] === true) {
+      ctx.strokeStyle = "#07E2F0"
+      ctx.strokeRect(
+        x,
+        y,
+        image.width,
+        image.height
+      )
+      ctx.strokeStyle = "black"
+    }
+  }
+
   const createAllPageElements = (
     createGrid: GridCellProps[],
     initialAnswers: React.MutableRefObject<string[]>,
@@ -235,6 +262,7 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
     answerStartPosition: React.MutableRefObject<Point>,
     inputTexts: TextsProps[],
     rawAnswerArray: GridCellProps[][],
+    imageList: ImagesProps | undefined,
     showAnswers: boolean,
     regenerate = false
   ) => {
@@ -246,6 +274,8 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
 
     ctx.reset()
     ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    pdfImages.current = imageList
 
     if (regenerate && squareSize.current !== 0) {
       squareSize.current
@@ -276,6 +306,16 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
       createTexts(initialPosition, size, value, index)
     })
     showAnswerMarkings.current && createAnswerMarkers(rawAnswers.current, startPosition)
+
+    pdfImages.current && pdfImages.current.imageList.map((image, index) => {
+      pdfImages.current?.addUpdateIndex?.forEach((imageIndex) => {
+        if (imageCornerP1.current[imageIndex] === undefined) {
+          imageCornerP1.current.push({x: 0, y: 0 })
+        }
+      })
+
+      createImage(image.dataURL ?? '', imageCornerP1.current[index], index)
+    })
   }
 
   interface CurrentPointProps {
@@ -327,6 +367,44 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
     })
   }
 
+  const clickedInImage = ({ x, y }: CurrentPointProps) => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const image = new Image()
+    image.src = pdfImages.current?.imageList[0]?.dataURL ?? ''
+
+    return pdfImages.current?.imageList.forEach(({ dataURL }, index) => {
+      const image = new Image()
+      image.src = dataURL ?? ''
+
+      const selectedImage = dragging.current.images.findIndex((image) => image)
+
+      if (
+        imageCornerP1.current[index].x <= x * 2 &&
+        imageCornerP1.current[index].x + image.width >= x * 2 &&
+        imageCornerP1.current[index].y <= y * 2 &&
+        imageCornerP1.current[index].y + image.height >= y * 2
+      ) {
+        dragging.current.maze = false
+        dragging.current.answers = false
+        dragging.current.texts.map((text) => text = false)
+
+        if (selectedImage === index || selectedImage === -1 ) {
+          dragging.current.images[index] = true
+        } else {
+          dragging.current.images[index] = false
+        }
+      } else {
+        dragging.current.images[index] = false
+      }
+
+    })
+  }
+
   const checkCloseEnough = (p1: number | undefined, p2: number | undefined) => {
 
     if (p1 === undefined || p2 === undefined) return false
@@ -371,6 +449,7 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
               answerCornerP1,
               texts.current,
               rawAnswers.current,
+              pdfImages.current,
               showAnswerMarkings.current
             )
           }
@@ -396,6 +475,33 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
               answerCornerP1,
               texts.current,
               rawAnswers.current,
+              pdfImages.current,
+              showAnswerMarkings.current
+            )
+          }
+        }
+      }
+
+      const dragImageElement = (index: number, isDragging: boolean) => {
+        if (isDragging === true && resizing.current === false) {
+          resizing.current = false
+
+          imageCornerP1.current[index] = {
+            x: imageCornerP1.current[index].x - resizingDirectionX * 2,
+            y: imageCornerP1.current[index].y - resizingDirectionY * 2
+          }
+
+          if (createdGrid.current !== undefined && squareSize.current) {
+            createAllPageElements(
+              createdGrid.current,
+              answers,
+              squareSize.current,
+              answerSpacing.current,
+              wordMazeCornerP1,
+              answerCornerP1,
+              texts.current,
+              rawAnswers.current,
+              pdfImages.current,
               showAnswerMarkings.current
             )
           }
@@ -413,6 +519,12 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
       if (dragging.current.answers === false && dragging.current.maze === false) {
         dragging.current.texts.map((drag, index) => {
           dragTextElement(index, drag)
+        })
+      }
+
+      if (dragging.current.answers === false && dragging.current.maze === false) {
+        dragging.current.images.map((drag, index) => {
+          dragImageElement(index, drag)
         })
       }
 
@@ -434,6 +546,7 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
             answerCornerP1,
             texts.current,
             rawAnswers.current,
+            pdfImages.current,
             showAnswerMarkings.current
           )
         }
@@ -483,6 +596,7 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
       }
 
       currentPoint && clickedInText(currentPoint)
+      currentPoint && clickedInImage(currentPoint)
 
       if (createdGrid.current !== undefined && squareSize.current) {
         createAllPageElements(
@@ -494,6 +608,7 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
           answerCornerP1,
           texts.current,
           rawAnswers.current,
+          pdfImages.current,
           showAnswerMarkings.current
         )
       }
