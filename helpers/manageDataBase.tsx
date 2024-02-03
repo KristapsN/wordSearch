@@ -12,8 +12,6 @@ const dbClient = new DynamoDBClient({
 const docClient = DynamoDBDocumentClient.from(dbClient)
 
 export async function addSubscriber(email: string) {
-  console.log(process.env.DYNAMODB_SECRET_ACCESS_KEY, 'ket')
-
   const command = new PutCommand({
      TableName: 'email_subscriptions',
      Item: {
@@ -24,7 +22,6 @@ export async function addSubscriber(email: string) {
      const response = await docClient.send(command)
      return response
   } catch (error) {
-    console.log('works?', error)
    throw error
   }
 }
