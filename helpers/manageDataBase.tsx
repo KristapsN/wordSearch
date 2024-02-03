@@ -4,8 +4,8 @@ import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand } from "@
 const dbClient = new DynamoDBClient({
   region: 'us-east-1',
   credentials: {
-    accessKeyId: process.env.production?.DYNAMODB_ACCESS_KEY_ID as string,
-    secretAccessKey: process.env.production?.DYNAMODB_SECRET_ACCESS_KEY as string
+    accessKeyId: process.env.DYNAMODB_ACCESS_KEY_ID as string,
+    secretAccessKey: process.env.DYNAMODB_SECRET_ACCESS_KEY as string
   },
 })
 const docClient = DynamoDBDocumentClient.from(dbClient)
