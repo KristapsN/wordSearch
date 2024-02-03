@@ -8,9 +8,10 @@ const dbClient = new DynamoDBClient({
     secretAccessKey: process.env.DYNAMODB_SECRET_ACCESS_KEY as string
   },
 })
+
 const docClient = DynamoDBDocumentClient.from(dbClient)
 
-export const addSubscriber = async (email: string) => {
+export async function addSubscriber(email: string) {
   console.log(process.env.DYNAMODB_SECRET_ACCESS_KEY, 'ket')
 
   const command = new PutCommand({
