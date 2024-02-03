@@ -21,6 +21,8 @@ import React from 'react'
 import { database } from '@/firebase/firebaseClient'
 import { ref, set } from 'firebase/database'
 import { v4 } from "uuid"
+import { addSubscriber } from '@/helpers/manageDataBase'
+
 
 export const spaceGrotesk700 = Space_Grotesk({ subsets: ['latin'], weight: "700" })
 export const spaceGrotesk600 = Space_Grotesk({ subsets: ['latin'], weight: "600" })
@@ -46,19 +48,19 @@ export default function Home() {
     setSlideOpacity('1')
   }, []);
 
-  const writeInDataBase = (email: string) => {
-    setDisableSubmit(true)
-    const referenceDb = ref(database, `subscribers/${v4()}`);
-    set(referenceDb, {
-      email
-    })
-      .then(() => {
-        setSavedSuccessfully(true)
-      })
-      .catch((error) => {
-        // The write failed...
-      });
-  };
+  // const writeInDataBase = (email: string) => {
+  //   setDisableSubmit(true)
+  //   const referenceDb = ref(database, `subscribers/${v4()}`);
+  //   set(referenceDb, {
+  //     email
+  //   })
+  //     .then(() => {
+  //       setSavedSuccessfully(true)
+  //     })
+  //     .catch((error) => {
+  //       // The write failed...
+  //     });
+  // };
 
   const [isHovering, setIsHovered] = useState(false);
   const onMouseEnter = () => setIsHovered(true);
@@ -97,8 +99,10 @@ export default function Home() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setValidationError(!isChecked)
-    isChecked && writeInDataBase(email)
+    isChecked && addSubscriber(email)
     isChecked && setEmail('')
+    // isChecked && writeInDataBase(email)
+    // isChecked && setEmail('')
   }
 
   return (
