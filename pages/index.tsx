@@ -99,7 +99,8 @@ export default function Home() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setValidationError(!isChecked)
-    isChecked && addSubscriber(email)
+    setDisableSubmit(true)
+    isChecked && addSubscriber(email, setSavedSuccessfully, setDisableSubmit)
     isChecked && setEmail('')
     // isChecked && writeInDataBase(email)
     // isChecked && setEmail('')
@@ -139,8 +140,7 @@ export default function Home() {
                       src="/word_search_maze_logo.svg"
                       alt="Word Search Maze"
                       fill
-                      sizes="(max-width: 70px) 100vw,
-                (max-width: 58px) 50vw"
+                      sizes="(max-width: 70px) 100vw, (max-width: 58px) 50vw"
                     />
                   </Box>
                   <h2 className={spaceGrotesk700.className}>Enjoy Word Search, Create Your Book and Sell It!</h2>
@@ -306,7 +306,7 @@ export default function Home() {
                         </form>
                       </div>
                       <div className={styles.checkbox_label_wrapper}>
-                        <label className={styles.margin_right_1}>
+                        <label className={styles.checkbox_label}>
                           <input
                             className={styles.checkbox_input}
                             type="checkbox"

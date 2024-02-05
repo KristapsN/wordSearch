@@ -11,7 +11,11 @@ const dbClient = new DynamoDBClient({
 
 const docClient = DynamoDBDocumentClient.from(dbClient)
 
-export async function addSubscriber(email: string) {
+export async function addSubscriber(
+  email: string,
+  setSavedSuccessfully: React.Dispatch<React.SetStateAction<boolean>>,
+  setDisableSubmit: React.Dispatch<React.SetStateAction<boolean>>
+) {
   const command = new PutCommand({
      TableName: 'email_subscriptions',
      Item: {
@@ -20,8 +24,11 @@ export async function addSubscriber(email: string) {
   })
   try {
      const response = await docClient.send(command)
+     setSavedSuccessfully(true)
      return response
   } catch (error) {
+    setSavedSuccessfully(false)
+    setDisableSubmit(false)
    throw error
   }
 }
