@@ -29,11 +29,11 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
     texts: [],
     images: []
   })
-  const initialWordMazeGeneration = useRef<boolean>(true)
   const texts = useRef<TextsProps[]>([])
   const rawAnswers = useRef<GridCellProps[][]>([[]])
   const showAnswerMarkings = useRef<boolean>(false)
   const pdfImages = useRef<ImagesProps>()
+  const squareResized = useRef<boolean>(false)
 
   const onMouseDown = () => setMouseDown(true)
 
@@ -256,7 +256,7 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
   const createAllPageElements = (
     createGrid: GridCellProps[],
     initialAnswers: React.MutableRefObject<string[]>,
-    initialSquareSize: number,
+    initialSquareSize: React.MutableRefObject<number>,
     initialAnswerSpacing: number,
     startPosition: React.MutableRefObject<Point>,
     answerStartPosition: React.MutableRefObject<Point>,
@@ -277,20 +277,14 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
 
     pdfImages.current = imageList
 
-    if (regenerate && squareSize.current !== 0) {
-      squareSize.current
-    } else {
-      squareSize.current = initialSquareSize
-    }
-
-    if (initialWordMazeGeneration.current === true) {
-      initialWordMazeGeneration.current = false
+    if (regenerate) {
       wordMazeCornerP1.current = startPosition.current
       answerCornerP1.current = answerStartPosition.current
-      squareSize.current = initialSquareSize
+      squareSize.current = initialSquareSize.current
     } else {
       startPosition.current = wordMazeCornerP1.current
       answerStartPosition.current = answerCornerP1.current
+      initialSquareSize.current = squareSize.current
     }
 
     texts.current = inputTexts
@@ -443,7 +437,7 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
             createAllPageElements(
               createdGrid.current,
               answers,
-              squareSize.current,
+              squareSize,
               answerSpacing.current,
               wordMazeCornerP1,
               answerCornerP1,
@@ -469,7 +463,7 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
             createAllPageElements(
               createdGrid.current,
               answers,
-              squareSize.current,
+              squareSize,
               answerSpacing.current,
               wordMazeCornerP1,
               answerCornerP1,
@@ -495,7 +489,7 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
             createAllPageElements(
               createdGrid.current,
               answers,
-              squareSize.current,
+              squareSize,
               answerSpacing.current,
               wordMazeCornerP1,
               answerCornerP1,
@@ -535,12 +529,13 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
 
       if (resizing.current === true) {
         wordMazeCornerP1.current = { x: currentPoint.x * 2, y: currentPoint.y * 2 }
+        squareSize.current = squareSize.current + calculateResizeAmount(resizingDirectionX / 10 * 2, resizingDirectionY / 10 * 2, squareSize.current)
 
         if (createdGrid.current !== undefined && squareSize.current) {
           createAllPageElements(
             createdGrid.current,
             answers,
-            squareSize.current + calculateResizeAmount(resizingDirectionX / 10 * 2, resizingDirectionY / 10 * 2, squareSize.current),
+            squareSize,
             answerSpacing.current,
             wordMazeCornerP1,
             answerCornerP1,
@@ -602,7 +597,7 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
         createAllPageElements(
           createdGrid.current,
           answers,
-          squareSize.current,
+          squareSize,
           answerSpacing.current,
           wordMazeCornerP1,
           answerCornerP1,

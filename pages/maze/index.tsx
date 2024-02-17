@@ -48,10 +48,11 @@ export default function Maze() {
   const [openAnswerMarkers, setOpenAnswerMarkers] = useState(false)
   const pdfPreviewHeight = useWindowSize().height ?? 0
   const pdfPreviewWidth = pdfPreviewHeight * (pdfSize[0] / pdfSize[1]) * 2
-  const squareSize = (pdfPreviewWidth - pdfPreviewWidth / 5) / 10
+  const squareSize = useRef<number>(0)
   const wordMazeCornerP1a = useRef<Point>({ x: 0, y: 0 })
   const answerStartPosition = useRef<Point>({ x: 0, y: 0 })
   const validAnswers = useRef<string[]>([])
+  const initialWordMazeGeneration = useRef<boolean>(true)
   const [texts, setTexts] = useState<TextsProps[]>([
     {
       value: '',
@@ -83,29 +84,30 @@ export default function Maze() {
   }, [pdfPreviewHeight])
 
   useEffect(() => {
-    wordMazeCornerP1a.current = { x: (pdfPreviewWidth - squareSize * 10) / 2, y: pdfPreviewHeight * 2 / 6 }
+    squareSize.current= (pdfPreviewWidth - pdfPreviewWidth / 5) / 10
+    wordMazeCornerP1a.current = { x: (pdfPreviewWidth - squareSize.current * 10) / 2, y: pdfPreviewHeight * 2 / 6 }
     answerStartPosition.current = {
-      x: (pdfPreviewWidth - squareSize * 10) / 2,
-      y: squareSize * 10 + pdfPreviewHeight * 2 / 6 + squareSize
+      x: (pdfPreviewWidth - squareSize.current * 10) / 2,
+      y: squareSize.current * 10 + pdfPreviewHeight * 2 / 6 + squareSize.current
     }
-
 
     if (pdfPreviewWidth !== 0) {
       createAllPageElements(
         createGrid,
         validAnswers,
         squareSize,
-        squareSize,
+        squareSize.current,
         wordMazeCornerP1a,
         answerStartPosition,
         texts,
         rawAnswerArray.current,
         images,
         openAnswerMarkers,
-        true
+        initialWordMazeGeneration.current
       )
+      initialWordMazeGeneration.current = false
     }
-  }, [pdfPreviewHeight, images, texts])
+  }, [pdfPreviewHeight, images, texts, pdfSize])
 
   const fillGridWithLetters = () => {
     const newLetterGrid = [...createGrid];
@@ -150,14 +152,14 @@ export default function Maze() {
           createGrid,
           validAnswers,
           squareSize,
-          squareSize,
+          squareSize.current,
           wordMazeCornerP1a,
           answerStartPosition,
           texts,
           rawAnswerArray.current,
           images,
           openAnswerMarkers,
-          true
+          initialWordMazeGeneration.current
         )
         // , pdfPreviewHeight * 2, pdfPreviewHeight * (595.28 / 841.89) * 2)
 
@@ -176,7 +178,7 @@ export default function Maze() {
       createGrid,
       validAnswers,
       squareSize,
-      squareSize,
+      squareSize.current,
       wordMazeCornerP1a,
       answerStartPosition,
       texts,
@@ -215,20 +217,6 @@ export default function Maze() {
       texts[index].value = event.target.value
     }
     setTexts(newTexts)
-
-    // createAllPageElements(
-    //   createGrid,
-    //   validAnswers,
-    //   squareSize,
-    //   squareSize,
-    //   wordMazeCornerP1a,
-    //   answerStartPosition,
-    //   texts,
-    //   rawAnswerArray.current,
-    //   images,
-    //   openAnswerMarkers,
-    //   true
-    // )
   }
 
   const addTextField = () => {
@@ -258,6 +246,7 @@ export default function Maze() {
 
   const handlePdfSizeChange = (size: pdfSizesListProps['size']) => {
     setPdfSize(size)
+    initialWordMazeGeneration.current = true
   }
 
   const pdfSizesList: pdfSizesListProps[] = [
