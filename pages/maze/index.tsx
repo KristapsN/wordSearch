@@ -185,7 +185,7 @@ export default function Maze() {
       rawAnswerArray.current,
       images,
       !openAnswerMarkers,
-      true
+      initialWordMazeGeneration.current
     )
 
     setOpenAnswerMarkers(!openAnswerMarkers)

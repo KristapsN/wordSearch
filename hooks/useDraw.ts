@@ -33,7 +33,6 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
   const rawAnswers = useRef<GridCellProps[][]>([[]])
   const showAnswerMarkings = useRef<boolean>(false)
   const pdfImages = useRef<ImagesProps>()
-  const squareResized = useRef<boolean>(false)
 
   const onMouseDown = () => setMouseDown(true)
 
