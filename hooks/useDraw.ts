@@ -2,6 +2,7 @@ import { GridCellProps } from "@/helpers/generateGrid"
 import { useEffect, useRef, useState } from "react"
 import { ImagesProps, TextsProps } from "@/pages/maze"
 
+
 export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void) => {
   const [mouseDown, setMouseDown] = useState(false)
 
@@ -201,14 +202,14 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
     ctx.strokeStyle = "black"
   }
 
-  const createTexts = (startPosition: Point, fontSize: number, text: string, index: number) => {
+  const createTexts = (startPosition: Point, fontSize: number, fontFamily: string, text: string, index: number) => {
     const canvas = canvasRef.current
     if (!canvas) return
 
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    ctx.font = `${fontSize}px serif`
+    ctx.font = `${fontSize}px ${fontFamily}`
 
     const startCoordinatesY = startPosition.y
     const startCoordinatesX = startPosition.x
@@ -220,16 +221,16 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
       ctx.strokeStyle = "#07E2F0"
       ctx.strokeRect(
         startPosition.x - ctx.measureText(text).width / 2,
-        startPosition.y - answerFontSize.current,
+        startPosition.y - fontSize,
         ctx.measureText(text).width,
-        answerFontSize.current * 1.4
+        fontSize * 1.4
       )
       ctx.strokeStyle = "black"
     }
 
   }
 
-  const createImage = (dataURL: string, { x, y }: CurrentPointProps, index: number) => {
+  const createImage = (dataURL: string, { x, y }: CurrentPointProps, index: number, imageWidth: number | undefined, imageHeight: number| undefined) => {
     const canvas = canvasRef.current
     if (!canvas) return
 
@@ -237,16 +238,16 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
     if (!ctx) return
     const image = new Image()
     image.src = dataURL
+    imageWidth && imageHeight && ctx.drawImage(image, x, y, imageWidth, imageHeight)
 
-    ctx.drawImage(image, x, y)
 
-    if (dragging.current.images[index] === true) {
+    if (dragging.current.images[index] === true && imageWidth && imageHeight) {
       ctx.strokeStyle = "#07E2F0"
       ctx.strokeRect(
         x,
         y,
-        image.width,
-        image.height
+        imageWidth,
+        imageHeight
       )
       ctx.strokeStyle = "black"
     }
@@ -295,8 +296,8 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
 
     createWordMaze(createGrid, startPosition)
     createAnswerList(answerCornerP1.current)
-    texts.current.map(({ initialPosition, size, value}, index) => {
-      createTexts(initialPosition, size, value, index)
+    texts.current.map(({ initialPosition, size, font, value}, index) => {
+      createTexts(initialPosition, size, font, value, index)
     })
     showAnswerMarkings.current && createAnswerMarkers(rawAnswers.current, startPosition)
 
@@ -307,7 +308,9 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
         }
       })
 
-      createImage(image.dataURL ?? '', imageCornerP1.current[index], index)
+      // console.log('pdfImages', pdfImages)
+
+      createImage(image.dataURL ?? '', imageCornerP1.current[index], index, pdfImages.current?.size[index][0], pdfImages.current?.size[index][1])
     })
   }
 
@@ -525,6 +528,16 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
       if (checkCloseEnough(currentPoint.x * 2, wordMazeCornerP1.current?.x) && checkCloseEnough(currentPoint.y * 2, wordMazeCornerP1.current?.y)) {
         resizing.current = true
       }
+      // test image drag
+      imageCornerP1.current.map((corner, index) => {
+        if (checkCloseEnough(currentPoint.x * 2, corner.x) && checkCloseEnough(currentPoint.y * 2, corner.y)) {
+
+          pdfImages.current && (pdfImages.current.size[index][0] = pdfImages.current.size[index][0] + resizingDirectionX * 2)
+          pdfImages.current && (pdfImages.current.size[index][1] = pdfImages.current.size[index][1] + resizingDirectionY * 2)
+          // imageCornerP1.current[index] 
+
+        }
+      })
 
       if (resizing.current === true) {
         wordMazeCornerP1.current = { x: currentPoint.x * 2, y: currentPoint.y * 2 }

@@ -10,7 +10,7 @@ import Switch from '@mui/material/Switch'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import UploadIcon from '@mui/icons-material/Upload'
-import { spaceGrotesk600, spaceGrotesk700 } from '..'
+import { spaceGrotesk700 } from '..'
 import Words from '@/helpers/generateWords'
 import { GridCellProps, generateGrid } from '@/helpers/generateGrid'
 import { useDraw } from '@/hooks/useDraw'
@@ -22,6 +22,8 @@ import { randomLetterGenerator } from '@/helpers/randomLetterGenerator'
 import { useWindowSize } from '@/hooks/windowSize'
 import jsPDF from 'jspdf'
 import ImageUploading, { ImageListType } from 'react-images-uploading'
+import { MenuItem, Select, SelectChangeEvent } from '@mui/material'
+import dynamic from 'next/dynamic'
 
 export interface TextsProps {
   value: string
@@ -38,6 +40,7 @@ type pdfSizesListProps = {
 export interface ImagesProps {
   imageList: ImageListType
   addUpdateIndex: number[] | undefined
+  size: [number , number][]
 }
 
 export default function Maze() {
@@ -53,22 +56,37 @@ export default function Maze() {
   const answerStartPosition = useRef<Point>({ x: 0, y: 0 })
   const validAnswers = useRef<string[]>([])
   const initialWordMazeGeneration = useRef<boolean>(true)
+  const imageSizes = useRef<[number, number][]>([])
+  const imageUploadIndexes = useRef<number[]>([])
+  const [fonts, setFonts] = useState<string[]>([])
   const [texts, setTexts] = useState<TextsProps[]>([
     {
       value: '',
       initialPosition: { x: 0, y: 0 },
       size: 32,
-      font: ''
+      font: 'Roboto'
     }
   ])
   const [images, setImages] = useState<ImagesProps>();
   const maxNumber = 69;
 
-  const onChange = (
+  const onImagesChange = (
     imageList: ImageListType,
     addUpdateIndex: number[] | undefined
   ) => {
-    setImages({ imageList, addUpdateIndex: addUpdateIndex })
+    const defaultSize:  [number , number] = [100, 140]
+
+    
+    if (addUpdateIndex) {
+      imageUploadIndexes.current.push(addUpdateIndex[0])
+      imageSizes.current.push(defaultSize)
+    } else {
+      imageUploadIndexes.current.pop()
+      imageSizes.current.pop()
+    }
+
+    setImages({ imageList, addUpdateIndex: imageUploadIndexes.current, size: imageSizes.current })
+    console.log('addUpdateIndex', images)
   }
 
   let answers: any[][]
@@ -84,7 +102,7 @@ export default function Maze() {
   }, [pdfPreviewHeight])
 
   useEffect(() => {
-    squareSize.current= (pdfPreviewWidth - pdfPreviewWidth / 5) / 10
+    squareSize.current = (pdfPreviewWidth - pdfPreviewWidth / 5) / 10
     wordMazeCornerP1a.current = { x: (pdfPreviewWidth - squareSize.current * 10) / 2, y: pdfPreviewHeight * 2 / 6 }
     answerStartPosition.current = {
       x: (pdfPreviewWidth - squareSize.current * 10) / 2,
@@ -219,6 +237,22 @@ export default function Maze() {
     setTexts(newTexts)
   }
 
+  const handleFontSize = (event: SelectChangeEvent<number>, index: number) => {
+    const newTexts = [...texts]
+    if (texts[index]) {
+      texts[index].size = event.target.value as number
+    }
+    setTexts(newTexts)
+  }
+  const handleFontFamily = (event: SelectChangeEvent<string>, index: number) => {
+    const newTexts = [...texts]
+    if (texts[index]) {
+      
+      texts[index].font = event.target.value
+    }
+    setTexts(newTexts)
+  }
+
   const addTextField = () => {
     const newTexts = [...texts]
     const fontSize = 24
@@ -226,7 +260,7 @@ export default function Maze() {
       {
         value: '',
         initialPosition: { x: pdfPreviewWidth / 2, y: pdfPreviewHeight * 2 / 12 + fontSize },
-        font: '',
+        font: 'Roboto',
         size: fontSize
       }
     )
@@ -256,6 +290,32 @@ export default function Maze() {
     { name: '6 x 9', size: [432, 648] },
     { name: '5.5 x 8.5', size: [396, 612] },
   ]
+  const fontSizes = Array.from({ length: 100 }, (_, index) => index + 7)
+
+  const fontCall = async () => {
+    const REACT_APP_GOOGLE_FONT_API_KEY = 'AIzaSyBSGaurJw4doiyDDoAlK0S29d2fjRxr5RE'
+    const apiKey = REACT_APP_GOOGLE_FONT_API_KEY
+    const fonts = ['Lato' ,'Montserrat', 'Open+Sans', 'Oswald', 'Poppins', 'Raleway', 'Roboto+Condensed', 'Roboto', 'Slabo+27px', 'Ubuntu']
+    const fontUrlBase = [`https://www.googleapis.com/webfonts/v1/webfonts?key=${apiKey}`]
+    fonts.map((font) => { fontUrlBase.push(`&family=${font}`)})
+    const response = await fetch(fontUrlBase.join(''))
+    const data = await response.json()
+
+    return data
+  }
+
+  useEffect(() => {
+    fontCall().then((data) => {
+      // @ts-ignore
+      const fontFamilies = data.items.map(font => font.family);
+      setFonts(fontFamilies);
+    })
+      .catch((error) => {
+        // setLoading(false)
+      })
+
+
+  }, []);
 
   return (
     <>
@@ -267,8 +327,7 @@ export default function Maze() {
       </Head>
       <Grid container sx={{ flexGrow: 1, backgroundColor: '#FCD0F4', height: "100%" }} className={styles.main2}>
         <Grid item xs={12} sm={12} md={12} lg={5}>
-          <Grid container className={styles.main}>
-
+          <Grid container className={styles.main} >
             <Box className={styles.slide_down} sx={{ background: "#FCD0F4" }}>
               <Box
                 className={styles.hide_slide_down}
@@ -323,9 +382,40 @@ export default function Maze() {
                         onChange={(e) => handleTextInput(e, index)}
                         value={value}
                       />
+                      <Select
+                        value={texts[index].size}
+                        label="Font size"
+                        onChange={(event) => handleFontSize(event, index)}
+                      >
+                        {fontSizes.map((size) => (
+                          <MenuItem
+                            key={size}
+                            value={size}
+                          >
+                            {size}
+                          </MenuItem>
+                        ))}
+
+                      </Select>
+                      <Select
+                        value={texts[index].font}
+                        label="Font family"
+                        onChange={(event) => handleFontFamily(event, index)}
+                      >
+                        {fonts.map((font) => (
+                          <MenuItem
+                            key={font}
+                            value={font}
+                          >
+                            {font}
+                          </MenuItem>
+                        ))}
+
+                      </Select>
                     </Box>
                   )
                 })}
+
               </Box>
               <Box sx={{ mb: '1rem' }}>
                 <Button
@@ -341,7 +431,7 @@ export default function Maze() {
                 <ImageUploading
                   multiple
                   value={images?.imageList ?? []}
-                  onChange={onChange}
+                  onChange={onImagesChange}
                   maxNumber={maxNumber}
                 >
                   {({
